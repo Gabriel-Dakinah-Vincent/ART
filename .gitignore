@@ -1,0 +1,18 @@
+# Exclude build artifacts and sensitive files
+build/
+dist/
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.exe
+*.spec
+*.log
+.env
+.env.*
+.vscode/
+build_env/
+agent_template.dist/
+agent_template.build/
+agent_template.exe
+agent_logs/
