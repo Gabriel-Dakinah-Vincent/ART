@@ -1,0 +1,6 @@
+discord.py
+requests
+openai
+aiofiles
+pywin32; sys_platform == 'win32'
+pyinstaller
