@@ -14,16 +14,88 @@ import uuid
 import time
 import datetime
 import json
+import ctypes
+
+INSTANCE_MUTEX_HANDLE = None
+
+def get_cached_id_path():
+    base_dir = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA") or os.path.expanduser("~")
+    return os.path.join(base_dir, "ART", "machine-id.txt")
+
+
+def load_cached_id():
+    try:
+        with open(get_cached_id_path(), "r", encoding="utf-8") as file_handle:
+            cached_id = file_handle.read().strip()
+            if cached_id:
+                return cached_id
+    except OSError:
+        pass
+    return None
+
+
+def store_cached_id(machine_id):
+    try:
+        cache_path = get_cached_id_path()
+        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+        with open(cache_path, "w", encoding="utf-8") as file_handle:
+            file_handle.write(machine_id)
+    except OSError:
+        pass
+
+
+def get_windows_machine_guid():
+    if os.name != "nt":
+        return None
+    try:
+        import winreg
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Cryptography") as key_handle:
+            machine_guid, _ = winreg.QueryValueEx(key_handle, "MachineGuid")
+            machine_guid = str(machine_guid).strip().lower()
+            if machine_guid:
+                return machine_guid
+    except OSError:
+        pass
+    return None
+
 
 def get_unique_id():
+    machine_guid = get_windows_machine_guid()
+    if machine_guid:
+        return machine_guid
     try:
         import uuid as uuidlib
         mac = uuidlib.getnode()
-        if (mac >> 40) % 2:
-            return str(uuid.uuid4())
-        return hex(mac)[2:]
+        if not ((mac >> 40) % 2):
+            return hex(mac)[2:]
     except Exception:
-        return str(uuid.uuid4())
+        pass
+
+    cached_id = load_cached_id()
+    if cached_id:
+        return cached_id
+
+    generated_id = str(uuid.uuid4())
+    store_cached_id(generated_id)
+    return generated_id
+
+
+def acquire_single_instance_guard():
+    global INSTANCE_MUTEX_HANDLE
+    if os.name != "nt":
+        return True
+    try:
+        kernel32 = ctypes.windll.kernel32
+        mutex_name = f"Local\\ART-{get_unique_id()}"
+        handle = kernel32.CreateMutexW(None, False, mutex_name)
+        if not handle:
+            return True
+        INSTANCE_MUTEX_HANDLE = handle
+        if kernel32.GetLastError() == 183:
+            return False
+        return True
+    except Exception:
+        return True
 
 def get_hostname():
     try:
@@ -831,6 +903,8 @@ Context:
                     await self.announcements_channel.send(f"🔴 [OFFLINE] {self.hostname} ({self.unique_id})")
 
 def run_discord_thread():
+    if not acquire_single_instance_guard():
+        return
     configure_windows_event_loop_policy()
     intents = discord.Intents.default()
     intents.message_content = True
