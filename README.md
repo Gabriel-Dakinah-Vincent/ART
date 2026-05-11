@@ -290,7 +290,7 @@ build.bat --icon "Microsoft 365.ico"
 
 That build will produce `build\my-icon.exe` unless you override the output name explicitly.
 
-For quoted filenames with spaces, the EXE name follows the same basename. For example, `--icon "Microsoft 365.ico"` produces `build\Microsoft 365.exe`.
+For icon filenames, the EXE name follows the same basename by default. For example, `--icon "Microsoft 365.ico"` produces `build\Microsoft 365.exe`.
 
 ### 4.1 Override the output EXE name
 ```bat
