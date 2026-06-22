@@ -708,7 +708,7 @@ set "ESCAPED_APP_NAME=%ESCAPED_APP_NAME:'=\'%"
 set "ESCAPED_OUTPUT_NAME=%OUTPUT_NAME:\=\\%"
 set "ESCAPED_OUTPUT_NAME=%ESCAPED_OUTPUT_NAME:'=\'%"
 
-set "VERSION_FILE=%BUILD_DIR%\%APP_NAME%.version.txt"
+set "VERSION_FILE=%SCRIPT_DIR%\%BUILD_DIR%\%APP_NAME%.version.txt"
 > "%VERSION_FILE%" echo VSVersionInfo^(
 >> "%VERSION_FILE%" echo   ffi=FixedFileInfo^(
 >> "%VERSION_FILE%" echo     filevers=^(%VERSION_COMMAS%^),
@@ -764,7 +764,7 @@ if /I not "%MANIFEST_EXEC_LEVEL%"=="asInvoker" if /I not "%MANIFEST_EXEC_LEVEL%"
 )
 
 if not exist "%BUILD_DIR%" mkdir "%BUILD_DIR%" >nul 2>&1
-set "MANIFEST_FILE=%BUILD_DIR%\%APP_NAME%.manifest"
+set "MANIFEST_FILE=%SCRIPT_DIR%\%BUILD_DIR%\%APP_NAME%.manifest"
 > "%MANIFEST_FILE%" (
   echo ^<?xml version="1.0" encoding="UTF-8" standalone="yes"?^>
   echo ^<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0"^>
